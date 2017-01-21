@@ -18,7 +18,7 @@ import android.widget.Toast;
 import com.timemanage.R;
 import com.timemanage.adapter.FragmentAdapter;
 import com.timemanage.utils.ActivityCollectorUtil;
-import com.timemanage.view.fragment.AnnulusFragment;
+import com.timemanage.view.fragment.PieChartFragment;
 import com.timemanage.view.fragment.BarChartFragment;
 
 import java.util.ArrayList;
@@ -70,14 +70,14 @@ public class MainActivity extends BaseActivity
         fmList = new ArrayList<Fragment>();
         if (fmList != null){
             fmList.add(new BarChartFragment());
-            fmList.add(new AnnulusFragment());
+            fmList.add(new PieChartFragment());
         }
         fmAdapter = new FragmentAdapter(getSupportFragmentManager(),fmList);
         viewPagerContent.setAdapter(fmAdapter);
         tabLayout.setupWithViewPager(viewPagerContent);
 
-        tabLayout.getTabAt(0).setText("饼状图");
-        tabLayout.getTabAt(1).setText("条形图");
+        tabLayout.getTabAt(0).setText("条形图");
+        tabLayout.getTabAt(1).setText("饼状图");
     }
 
     @Override
