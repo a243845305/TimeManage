@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context="com.timemanage.view.activity.StatisticsActivity">
+
+    <android.support.design.widget.AppBarLayout
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:background="@drawable/side_nav_bar"
+        android:theme="@style/AppTheme.AppBarOverlay">
+
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/stat_toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="@drawable/side_nav_bar"
+            app:popupTheme="@style/AppTheme.AppBarOverlay"
+
+            />
+    </android.support.design.widget.AppBarLayout>
+
+
+
+    <RadioGroup
+        android:id="@+id/rd_group"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_alignParentBottom="true"
+        android:gravity="center|center_vertical"
+        android:background="@drawable/side_nav_bar"
+        android:orientation="horizontal">
+
+        <RadioButton
+            android:id="@+id/rd_menu_deal"
+            style="@style/tab_menu_item"
+            android:text="日"/>
+
+        <RadioButton
+            android:id="@+id/rd_menu_poi"
+            style="@style/tab_menu_item"
+            android:text="周"/>
+
+        <RadioButton
+            android:id="@+id/rd_menu_more"
+            style="@style/tab_menu_item"
+            android:text="月"/>
+    </RadioGroup>
+</RelativeLayout>

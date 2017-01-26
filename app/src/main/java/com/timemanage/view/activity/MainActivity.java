@@ -12,7 +12,9 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.Window;
+import android.widget.Button;
 import android.widget.Toast;
 
 import com.timemanage.R;
@@ -26,7 +28,7 @@ import java.util.List;
 
 
 public class MainActivity extends BaseActivity
-        implements NavigationView.OnNavigationItemSelectedListener {
+        implements NavigationView.OnNavigationItemSelectedListener, View.OnClickListener {
 
     private long currentBackPressedTime = 0;
     private static final int BACK_PRESSED_INTERVAL = 2000;
@@ -36,6 +38,8 @@ public class MainActivity extends BaseActivity
     private NavigationView navigationView;
     private ViewPager viewPagerContent;
     private MenuItem menuItem;
+
+    private Button btnStatistics;
 
     private List<Fragment> fmList;
     private FragmentAdapter fmAdapter;
@@ -52,11 +56,12 @@ public class MainActivity extends BaseActivity
     }
 
     public void initView(){
-        tabLayout = (TabLayout) findViewById(R.id.tablayout);
+//        tabLayout = (TabLayout) findViewById(R.id.tablayout);
         viewPagerContent = (ViewPager) findViewById(R.id.vp_content);
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         navigationView = (NavigationView) findViewById(R.id.nav_view);
+        btnStatistics = (Button) findViewById(R.id.btn_statistics);
 
         setSupportActionBar(toolbar);
 
@@ -66,18 +71,20 @@ public class MainActivity extends BaseActivity
         toggle.syncState();
 
         navigationView.setNavigationItemSelectedListener(this);
+        btnStatistics.setOnClickListener(this);
 
         fmList = new ArrayList<Fragment>();
         if (fmList != null){
-            fmList.add(new BarChartFragment());
+//            fmList.add(new BarChartFragment());
             fmList.add(new PieChartFragment());
         }
         fmAdapter = new FragmentAdapter(getSupportFragmentManager(),fmList);
         viewPagerContent.setAdapter(fmAdapter);
-        tabLayout.setupWithViewPager(viewPagerContent);
-
-        tabLayout.getTabAt(0).setText("条形图");
-        tabLayout.getTabAt(1).setText("饼状图");
+        //只放一个饼状图在上面，扩展的功能先留着，方便以后扩展
+//        tabLayout.setupWithViewPager(viewPagerContent);
+//
+//        tabLayout.getTabAt(0).setText("条形图");
+//        tabLayout.getTabAt(0).setText("饼状图");
     }
 
     @Override
@@ -144,5 +151,17 @@ public class MainActivity extends BaseActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    @Override
+    public void onClick(View view) {
+        int v = view.getId();
+        switch (v){
+            case R.id.btn_statistics:
+                 StatisticsActivity.actionStart(this);
+                break;
+            default:
+                break;
+        }
     }
 }

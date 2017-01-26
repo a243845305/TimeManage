@@ -22,6 +22,8 @@ import java.util.Random;
 /**
  * 条形图展示页面
  * Created by Yawen_Li on 2017/1/17.
+ *
+ * 由于条形图对于页面展示并不是很合适，所以先不使用条形图，以后需要扩展时再使用
  */
 public class BarChartFragment extends BaseFragment {
 
@@ -46,7 +48,9 @@ public class BarChartFragment extends BaseFragment {
         if (mView == null) {
             mView = inflater.inflate(R.layout.fragment_barchart, container, false);
 
-            chart = new BarChart(getContext());
+            chart = (BarChart) mView.findViewById(R.id.fag_barchart);
+
+
 
             /**图表具体设置*/
             ArrayList<BarEntry> entries = new ArrayList<>();//显示条目
@@ -72,7 +76,7 @@ public class BarChartFragment extends BaseFragment {
             //图表描述
             chart.setDescription("公司前半年财务报表(单位：万元)");
 
-            mView = chart;
+
         }
         return mView;
     }
