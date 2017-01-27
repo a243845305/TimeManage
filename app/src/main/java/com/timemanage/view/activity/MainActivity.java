@@ -70,8 +70,7 @@ public class MainActivity extends BaseActivity
         drawer.setDrawerListener(toggle);
         toggle.syncState();
 
-        navigationView.setNavigationItemSelectedListener(this);
-        btnStatistics.setOnClickListener(this);
+
 
         fmList = new ArrayList<Fragment>();
         if (fmList != null){
@@ -85,6 +84,9 @@ public class MainActivity extends BaseActivity
 //
 //        tabLayout.getTabAt(0).setText("条形图");
 //        tabLayout.getTabAt(0).setText("饼状图");
+
+        navigationView.setNavigationItemSelectedListener(this);
+        btnStatistics.setOnClickListener(this);
     }
 
     @Override

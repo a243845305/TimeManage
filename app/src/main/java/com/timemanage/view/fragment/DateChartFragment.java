@@ -6,6 +6,7 @@ import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import com.github.mikephil.charting.animation.Easing;
 import com.github.mikephil.charting.charts.PieChart;
@@ -17,78 +18,73 @@ import com.github.mikephil.charting.formatter.PercentFormatter;
 import com.timemanage.R;
 
 import java.util.ArrayList;
-import java.util.Random;
 
 /**
  *
- * 环形展示页面
- * Created by Yawen_Li on 2017/1/17.
+ * 统计日视图
+ * Created by Yawen_Li on 2017/1/27.
  */
-public class PieChartFragment extends BaseFragment {
+public class DateChartFragment extends BaseFragment implements View.OnClickListener{
 
     private View mView;
 
     private PieChart pieChart;
     private PieData pieData;
     private PieDataSet pieDataSet;
+    private TextView tvDate;
 
     private String[] x = new String[] { "A类事物", "B类事物", "C类事物","D类事物" };
 
     // 凑成100 % 100
     private float[] y = { 10f, 60f, 10f, 20f };
 
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
     }
 
-
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        if (mView == null){
-            mView = inflater.inflate(R.layout.fragment_piechart,container,false);
-            pieChart = (PieChart) mView.findViewById(R.id.fag_piechart);
-
+        if (mView == null) {
+            mView = inflater.inflate(R.layout.fragment_date,container,false);
+            pieChart = (PieChart) mView.findViewById(R.id.fag_date_piechart);
+            tvDate = (TextView) mView.findViewById(R.id.tv_date);
+            tvDate.setOnClickListener(this);
             initView();
-
-
         }
+
         return mView;
     }
-
     private void initView(){
+
+
         // 设置 pieChart 图表基本属性
-        pieChart.setUsePercentValues(false);            //使用百分比显示  
+        pieChart.setUsePercentValues(false);            //使用百分比显示
         pieChart.setDescription("饼状图设置");           //设置pieChart图表的描述
         pieChart.setDescriptionTextSize(14f);
-        pieChart.setBackgroundColor(Color.YELLOW);      //设置pieChart图表背景色  
-        pieChart.setExtraOffsets(5, 10, 60, 10);        //设置pieChart图表上下左右的偏移，类似于外边距  
-        pieChart.setDragDecelerationFrictionCoef(0.95f);//设置pieChart图表转动阻力摩擦系数[0,1]  
-        pieChart.setRotationAngle(0);                   //设置pieChart图表起始角度  
+        pieChart.setBackgroundColor(Color.YELLOW);      //设置pieChart图表背景色
+        pieChart.setExtraOffsets(5, 10, 60, 10);        //设置pieChart图表上下左右的偏移，类似于外边距
+        pieChart.setDragDecelerationFrictionCoef(0.95f);//设置pieChart图表转动阻力摩擦系数[0,1]
+        pieChart.setRotationAngle(0);                   //设置pieChart图表起始角度
         pieChart.setRotationEnabled(false);              //设置pieChart图表是否可以手动旋转
-        pieChart.setHighlightPerTapEnabled(true);       //设置piecahrt图表点击Item高亮是否可用  
+        pieChart.setHighlightPerTapEnabled(true);       //设置piecahrt图表点击Item高亮是否可用
         pieChart.animateY(1400, Easing.EasingOption.EaseInOutQuad);// 设置pieChart图表展示动画效果
         pieChart.setDrawSliceText(false);
 
-        // 设置 pieChart 图表Item文本属性
-//        pieChart.setDrawEntryLabels(true);              //设置pieChart是否只显示饼图上百分比不显示文字（true：下面属性才有效果）
-//        pieChart.setEntryLabelColor(Color.WHITE);       //设置pieChart图表文本字体颜色
-//        pieChart.setEntryLabelTypeface(mTfRegular);     //设置pieChart图表文本字体样式
-//        pieChart.setEntryLabelTextSize(10f);            //设置pieChart图表文本字体大小
-
         // 设置 pieChart 内部圆环属性
-        pieChart.setDrawHoleEnabled(true);              //是否显示PieChart内部圆环(true:下面属性才有意义)  
+        pieChart.setDrawHoleEnabled(true);              //是否显示PieChart内部圆环(true:下面属性才有意义)
         pieChart.setHoleRadius(50f);                    //设置PieChart内部圆的半径(这里设置28.0f)
         pieChart.setTransparentCircleRadius(55f);       //设置PieChart内部透明圆的半径(这里设置31.0f)
-        pieChart.setTransparentCircleColor(Color.BLACK);//设置PieChart内部透明圆与内部圆间距(31f-28f)填充颜色  
-        pieChart.setTransparentCircleAlpha(50);         //设置PieChart内部透明圆与内部圆间距(31f-28f)透明度[0~255]数值越小越透明  
-        pieChart.setHoleColor(Color.WHITE);             //设置PieChart内部圆的颜色  
-        pieChart.setDrawCenterText(true);               //是否绘制PieChart内部中心文本（true：下面属性才有意义）  
+        pieChart.setTransparentCircleColor(Color.BLACK);//设置PieChart内部透明圆与内部圆间距(31f-28f)填充颜色
+        pieChart.setTransparentCircleAlpha(50);         //设置PieChart内部透明圆与内部圆间距(31f-28f)透明度[0~255]数值越小越透明
+        pieChart.setHoleColor(Color.WHITE);             //设置PieChart内部圆的颜色
+        pieChart.setDrawCenterText(true);               //是否绘制PieChart内部中心文本（true：下面属性才有意义）
 //        pieChart.setCenterTextTypeface(mTfLight);       //设置PieChart内部圆文字的字体样式
-        pieChart.setCenterText("Test");                 //设置PieChart内部圆文字的内容  
+        pieChart.setCenterText("Test");                 //设置PieChart内部圆文字的内容
         pieChart.setCenterTextSize(10f);                //设置PieChart内部圆文字的大小
-        pieChart.setCenterTextColor(Color.RED);         //设置PieChart内部圆文字的颜色  
+        pieChart.setCenterTextColor(Color.RED);         //设置PieChart内部圆文字的颜色
 
         // pieChart添加数据
         setData();
@@ -96,10 +92,6 @@ public class PieChartFragment extends BaseFragment {
         // 获取pieCahrt图列
         Legend l = pieChart.getLegend();
         l.setEnabled(true);                    //是否启用图列（true：下面属性才有意义）
-//        l.setVerticalAlignment(Legend.LegendVerticalAlignment.TOP);
-//        l.setHorizontalAlignment(Legend.LegendHorizontalAlignment.RIGHT);
-//        l.setOrientation(Legend.LegendOrientation.VERTICAL);
-//        l.setForm(Legend.LegendForm.DEFAULT); //设置图例的形状
         l.setPosition(Legend.LegendPosition.BELOW_CHART_LEFT);
         l.setFormSize(10);                    //设置图例的大小
         l.setFormToTextSpace(5f);            //设置每个图例实体中标签和形状之间的间距
@@ -110,7 +102,7 @@ public class PieChartFragment extends BaseFragment {
         l.setTextSize(16f);                   //设置图例标签文本的大小
         l.setTextColor(Color.BLACK);          //设置图例标签文本的颜色
 
-        
+
         pieChart.invalidate();
     }
 
@@ -141,5 +133,15 @@ public class PieChartFragment extends BaseFragment {
         pieData.setValueTextColor(Color.BLACK);
 
         pieChart.setData(pieData);
+    }
+
+    @Override
+    public void onClick(View view) {
+        switch (view.getId()){
+            case R.id.tv_date:
+                break;
+            default:
+                break;
+        }
     }
 }

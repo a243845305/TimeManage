@@ -1,51 +1,51 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
     tools:context="com.timemanage.view.activity.StatisticsActivity">
 
-    <android.support.design.widget.AppBarLayout
-        android:layout_height="wrap_content"
+
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/stat_toolbar"
         android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
         android:background="@drawable/side_nav_bar"
-        android:theme="@style/AppTheme.AppBarOverlay">
-
-        <android.support.v7.widget.Toolbar
-            android:id="@+id/stat_toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:background="@drawable/side_nav_bar"
-            app:popupTheme="@style/AppTheme.AppBarOverlay"
-
-            />
-    </android.support.design.widget.AppBarLayout>
+        app:popupTheme="@style/AppTheme.PopupOverlay"
+        app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar" />
 
 
+    <FrameLayout
+        android:id="@+id/fl_content"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+    </FrameLayout>
 
     <RadioGroup
         android:id="@+id/rd_group"
         android:layout_width="match_parent"
         android:layout_height="60dp"
-        android:layout_alignParentBottom="true"
-        android:gravity="center|center_vertical"
         android:background="@drawable/side_nav_bar"
+        android:gravity="center|center_vertical"
         android:orientation="horizontal">
 
         <RadioButton
-            android:id="@+id/rd_menu_deal"
+            android:id="@+id/rdbtn_date"
             style="@style/tab_menu_item"
-            android:text="日"/>
+            android:text="日" />
 
         <RadioButton
-            android:id="@+id/rd_menu_poi"
+            android:id="@+id/rdbtn_week"
             style="@style/tab_menu_item"
-            android:text="周"/>
+            android:text="周" />
 
         <RadioButton
-            android:id="@+id/rd_menu_more"
+            android:id="@+id/rdbtn_month"
             style="@style/tab_menu_item"
-            android:text="月"/>
+            android:text="月" />
     </RadioGroup>
-</RelativeLayout>
+</LinearLayout>

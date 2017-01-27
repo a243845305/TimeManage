@@ -20,7 +20,10 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".view.activity.StatisticsActivity" >
+        <activity
+            android:name=".view.activity.StatisticsActivity"
+            android:launchMode="singleTask"
+            android:screenOrientation="portrait">
         </activity>
     </application>
 
