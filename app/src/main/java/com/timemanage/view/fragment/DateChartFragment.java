@@ -1,12 +1,18 @@
 package com.timemanage.view.fragment;
 
+import android.app.AlertDialog;
+import android.app.DatePickerDialog;
+import android.app.Dialog;
+import android.support.v4.app.DialogFragment;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.DatePicker;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.github.mikephil.charting.animation.Easing;
 import com.github.mikephil.charting.charts.PieChart;
@@ -17,7 +23,10 @@ import com.github.mikephil.charting.data.PieDataSet;
 import com.github.mikephil.charting.formatter.PercentFormatter;
 import com.timemanage.R;
 
+
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 
 /**
  *
@@ -31,7 +40,8 @@ public class DateChartFragment extends BaseFragment implements View.OnClickListe
     private PieChart pieChart;
     private PieData pieData;
     private PieDataSet pieDataSet;
-    private TextView tvDate;
+    public static TextView tvDate;
+
 
     private String[] x = new String[] { "A类事物", "B类事物", "C类事物","D类事物" };
 
@@ -52,6 +62,12 @@ public class DateChartFragment extends BaseFragment implements View.OnClickListe
             pieChart = (PieChart) mView.findViewById(R.id.fag_date_piechart);
             tvDate = (TextView) mView.findViewById(R.id.tv_date);
             tvDate.setOnClickListener(this);
+            Calendar c = Calendar.getInstance();
+            int year = c.get(Calendar.YEAR);
+            int month = c.get(Calendar.MONTH);
+            int day = c.get(Calendar.DAY_OF_MONTH);
+            tvDate.setText(year+"/"+(month+1)+"/"+day);
+
             initView();
         }
 
@@ -139,9 +155,33 @@ public class DateChartFragment extends BaseFragment implements View.OnClickListe
     public void onClick(View view) {
         switch (view.getId()){
             case R.id.tv_date:
+                DatePickerFragment datePickerFragment = new DatePickerFragment();
+                datePickerFragment.show(getFragmentManager(),"datePicker");
                 break;
             default:
                 break;
         }
     }
+
+    public static class DatePickerFragment extends DialogFragment implements DatePickerDialog.OnDateSetListener {
+
+        @Override
+        public Dialog onCreateDialog(Bundle savedInstanceState) {
+            // Use the current date as the default date in the picker
+            final Calendar c = Calendar.getInstance();
+            int year = c.get(Calendar.YEAR);
+            int month = c.get(Calendar.MONTH);
+            int day = c.get(Calendar.DAY_OF_MONTH);
+            // Create a new instance of DatePickerDialog and return it
+            return new DatePickerDialog(getActivity(), AlertDialog.THEME_HOLO_LIGHT, this, year, month, day);
+        }
+
+        // 日期选择器listener操作，请求对应日期数据
+        public void onDateSet(DatePicker view, int year, int month, int day) {
+            tvDate.setText(year+"/"+(month+1)+"/"+day);
+//            Toast.makeText(getContext(),year+"/"+month+"/"+day,Toast.LENGTH_SHORT).show();
+        }
+
+    }
+
 }
