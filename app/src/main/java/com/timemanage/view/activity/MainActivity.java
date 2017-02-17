@@ -3,6 +3,7 @@ package com.timemanage.view.activity;
 
 import android.app.ActivityManager;
 import android.content.ComponentName;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.support.design.widget.NavigationView;
@@ -23,7 +24,10 @@ import android.widget.Toast;
 
 import com.timemanage.R;
 import com.timemanage.adapter.FragmentAdapter;
+import com.timemanage.service.TimeManageService;
 import com.timemanage.utils.ActivityCollectorUtil;
+import com.timemanage.utils.ConstantUtil;
+import com.timemanage.utils.LogUtil;
 import com.timemanage.view.fragment.PieChartFragment;
 import com.timemanage.view.fragment.BarChartFragment;
 
@@ -56,30 +60,12 @@ public class MainActivity extends BaseActivity
         requestWindowFeature(Window.FEATURE_NO_TITLE);
 
         setContentView(R.layout.activity_main);
+
+        Intent startServiceIntent = new Intent();
+        ComponentName componentName = new ComponentName(ConstantUtil.pkgName,ConstantUtil.serviceName);
+        startServiceIntent.setComponent(componentName);
+        this.startService(startServiceIntent);
         initView();
-
-        ActivityManager manager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
-
-        while (true) {
-            /** 获取当前正在运行的任务栈列表， 越是靠近当前运行的任务栈会被排在第一位，之后的以此类推 */
-            List<ActivityManager.RunningTaskInfo> runningTasks = manager.getRunningTasks(1);
-
-            /** 获得当前最顶端的任务栈，即前台任务栈 */
-            ActivityManager.RunningTaskInfo runningTaskInfo = runningTasks.get(0);
-
-            /** 获取前台任务栈的最顶端 Activity */
-            ComponentName topActivity = runningTaskInfo.topActivity;
-
-            /** 获取应用的包名 */
-            String packageName = topActivity.getPackageName();
-
-            /** 输出检测到的启动应用信息 */
-            Log.i("MainActivity", packageName);
-
-            /** 为了便于观察信息的输出，程序休眠2秒 */
-            SystemClock.sleep(2000);
-        }
-
 
     }
 
