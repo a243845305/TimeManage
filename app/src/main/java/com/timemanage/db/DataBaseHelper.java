@@ -10,14 +10,24 @@ import android.database.sqlite.SQLiteOpenHelper;
  */
 public class DataBaseHelper extends SQLiteOpenHelper {
 
+    private static final String DB_NAME = "TimeManageDB.db"; //数据库名称
+    private static final int version = 1; //数据库版本
 
-    public DataBaseHelper(Context context, String name, SQLiteDatabase.CursorFactory factory, int version) {
-        super(context, name, factory, version);
+    public DataBaseHelper(Context context) {
+        super(context, DB_NAME, null, version);
     }
 
     @Override
-    public void onCreate(SQLiteDatabase sqLiteDatabase) {
-
+    public void onCreate(SQLiteDatabase db) {
+        String sql = "create table t_user(userid integer primary key autoincrement ," +
+                "username text not null , " +
+                "password text not null ," +
+                "userimg text);";
+        String sql1 = "create table t_app(appid integer primary key autonicrement ," +
+                "userid integer not null ," +
+                "appname text not null ," +
+                "appicon text not null );";
+        db.execSQL(sql);
     }
 
     @Override
