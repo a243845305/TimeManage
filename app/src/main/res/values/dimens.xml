@@ -6,4 +6,19 @@
     <dimen name="activity_horizontal_margin">16dp</dimen>
     <dimen name="activity_vertical_margin">16dp</dimen>
     <dimen name="fab_margin">16dp</dimen>
+    <dimen name="tab_height">48dp</dimen>
+    <dimen name="tab_height_large">72dp</dimen>
+    <dimen name="margin_16dp">16dp</dimen>
+    <dimen name="margin_4dp">4dp</dimen>
+    <!--字体定义-->
+    <dimen name="font_size_tab">15sp</dimen>
+    <dimen name="font_size">14sp</dimen>
+    <dimen name="float_font_size">16sp</dimen>
+    <dimen name="font_title">16sp</dimen>
+    <dimen name="news_title">17sp</dimen>
+    <dimen name="font_time">14sp</dimen>
+    <dimen name="font_personal_info">14sp</dimen>
+    <dimen name="font_size_large">14sp</dimen>
+    <!--行间距-->
+    <dimen name="font_space">5dp</dimen>
 </resources>

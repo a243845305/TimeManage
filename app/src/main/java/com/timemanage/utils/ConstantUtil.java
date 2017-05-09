@@ -13,5 +13,7 @@ public class ConstantUtil {
 
     //============================整形常量的定义===================================
 
+    //登录成功之后的缓存文件名（主要为了保存authToken）
+    public static final String CACHE_KEY = "Cache_User";
 
 }

@@ -2,28 +2,23 @@ package com.timemanage.service;
 
 
 import android.app.Notification;
-import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.app.Service;
 import android.content.ComponentName;
-import android.content.Context;
 import android.content.Intent;
-import android.os.Build;
 import android.os.IBinder;
-import android.os.PowerManager;
 import android.support.annotation.Nullable;
-import android.support.v4.app.NotificationCompat;
-import android.util.Log;
+import android.text.format.Time;
 
 import com.timemanage.R;
 import com.timemanage.bean.AppInfo;
+import com.timemanage.db.DataBaseHelper;
+import com.timemanage.db.DataBaseManager;
 import com.timemanage.utils.ApkUtil;
 import com.timemanage.utils.ConstantUtil;
 import com.timemanage.utils.LogUtil;
 import com.timemanage.view.activity.MainActivity;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -35,6 +30,10 @@ public class TimeManageService extends MyIntentService {
 
     private ScreenObserve screenObserve;
     private boolean isScreenOn;
+    private DataBaseManager dbManager;
+    private List<AppInfo> appInfos;
+    private Time t;
+    private Date date;
 
     public TimeManageService() {
         super("TimeManageService");
@@ -55,7 +54,13 @@ public class TimeManageService extends MyIntentService {
         Notification notification = builder.build();
         startForeground(1, notification);
 
+        date = new Date();
+        t = new Time("GMT+8");
         isScreenOn = true;
+        dbManager = new DataBaseManager(this);
+
+//        DataBaseHelper dbHelper = new DataBaseHelper(this);
+//        dbHelper.deleteDBByName();
 
         screenObserve = new ScreenObserve(TimeManageService.this);
         screenObserve.requestScreenStateUpdate(new ScreenObserve.ScreenStateListener() {
@@ -79,16 +84,17 @@ public class TimeManageService extends MyIntentService {
             @Override
             public void run() {
                 super.run();
-                final List<AppInfo> appInfos = ApkUtil.scanLocalInstallAppList(TimeManageService.this.getPackageManager());
+                appInfos = ApkUtil.scanLocalInstallAppList(TimeManageService.this.getPackageManager());
                 int count = 0;
                 for (AppInfo appInfo: appInfos ) {
                     LogUtil.e(count+"appName",appInfo.getAppName());
+                    LogUtil.e(count+"appIcon",appInfo.getAppIcon().toString());
+                    LogUtil.e(count+"appPackageName",appInfo.getAppPackageName());
+                    appInfo.setAppDuration("0");
                     count++;
                 }
-
-                String foregroundProcess = ApkUtil.getForegroundApp(TimeManageService.this.getPackageManager());
-                LogUtil.e("foregroundProcess:",foregroundProcess);
-            }
+                dbManager.insertAppContentsTot_app(appInfos);
+        }
         }.start();
     }
 
@@ -102,10 +108,38 @@ public class TimeManageService extends MyIntentService {
 
         while(isScreenOn){
             String foregroundProcess = ApkUtil.getForegroundApp(TimeManageService.this.getPackageManager());
-            if (!(foregroundProcess == null))
+            if (foregroundProcess != null){
+                for (AppInfo appInfo: appInfos){
+                    if (foregroundProcess.equals(appInfo.getAppPackageName())){
+                        int d = Integer.parseInt(appInfo.getAppDuration());
+                        d = d+1;
+                        appInfo.setAppDuration(d+"");
+                        LogUtil.e("appDuration",appInfo.getAppDuration());
+                    }
+                }
                 LogUtil.e("foregroundProcess:",foregroundProcess);
+            }
+
+            t.setToNow();
+            int year = t.year;
+            int month = t.month;
+            int day = t.monthDay;
+            int minute = t.minute;
+            int hour = t.hour;
+            LogUtil.e("Now minute:::::",minute+""+"hour:::"+hour);
+            if (hour-16 == 0 && minute == 0){
+                //每到零点时进行插入数据操作
+                //不知为什么小时取出多了16，可能是时区的缘故吧
+                dbManager.insertAppDurationTot_apptime(appInfos,year,month,day);
+            }
+
+            if (minute == 0){
+                //每到整点时进行更新数据操作
+                dbManager.updateAppDurationTot_apptime(appInfos,year,month,day);
+            }
+
             try {
-                Thread.sleep(5000);
+                Thread.sleep(60*1000);
             } catch (InterruptedException e) {
                 throw new RuntimeException("interrupted",e);
             }

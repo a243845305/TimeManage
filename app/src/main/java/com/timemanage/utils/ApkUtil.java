@@ -39,7 +39,8 @@ public class ApkUtil {
                 if (packageInfo.applicationInfo.loadIcon(packageManager) == null) {
                     continue;
                 }
-                myAppInfo.setImage(packageInfo.applicationInfo.loadIcon(packageManager));
+                myAppInfo.setAppPackageName(packageInfo.applicationInfo.packageName);
+                myAppInfo.setAppIcon(packageInfo.applicationInfo.loadIcon(packageManager));
                 myAppInfos.add(myAppInfo);
             }
         }catch (Exception e){
@@ -92,7 +93,7 @@ public class ApkUtil {
                     continue;
                 }
                 String cmdline = read(String.format("/proc/%d/cmdline", pid));
-                if (cmdline.contains("com.android.") || cmdline.contains("com.meizu.")) {
+                if (cmdline.contains("com.android.") || cmdline.contains("com.meizu.") || cmdline.contains("android.")) {
                     continue;
                 }
                 int uid = Integer.parseInt(
@@ -124,16 +125,17 @@ public class ApkUtil {
                 int oomscore = Integer.parseInt(read(String.format("/proc/%d/oom_score", pid)));
                 if (oomscore < lowestOomScore) {
                     lowestOomScore = oomscore;
-//                    foregroundProcess = cmdline;
+                    foregroundProcess = cmdline;
+                    LogUtil.e("foregroundProcess:",cmdline);
                     //根据获取到的进程名，拿到了应用的名字并返回
-                    foregroundProcess = packageManager.getApplicationLabel(packageManager.getApplicationInfo(cmdline,
-                            PackageManager.GET_META_DATA)).toString();
+//                    foregroundProcess = packageManager.getApplicationLabel(packageManager.getApplicationInfo(cmdline,
+//                            PackageManager.GET_META_DATA)).toString();
 
                 }
             } catch (IOException e) {
                 e.printStackTrace();
-            } catch (PackageManager.NameNotFoundException e) {
-                e.printStackTrace();
+//            } catch (PackageManager.NameNotFoundException e) {
+//                e.printStackTrace();
             }
         }
         return foregroundProcess;

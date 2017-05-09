@@ -26,4 +26,31 @@
         <item name="android:textColor">@drawable/tab_menu_text</item>
         <item name="android:textSize">18sp</item>
     </style>
+
+    <!--圆角图片-->
+    <declare-styleable name="RoundImageView">
+        <attr name="borderThickness" format="integer" />
+        <attr name="borderInsideColor" format="color" />
+        <attr name="borderOutsideColor" format="color" />
+    </declare-styleable>
+
+    <!--点击头像弹出的dialog -->
+    <style name="PhotoDialog" parent="@android:style/Theme.Dialog">
+        <item name="android:windowFrame">@null</item><!--边框-->
+        <item name="android:windowIsFloating">true</item><!--是否浮现在activity之上-->
+        <item name="android:windowIsTranslucent">false</item><!--半透明-->
+        <item name="android:windowNoTitle">true</item><!--无标题-->
+        <item name="android:windowBackground">@color/transparent</item><!--背景透明-->
+        <item name="android:backgroundDimEnabled">true</item><!--模糊-->
+        <item name="android:layout_marginLeft">20dp</item>
+        <item name="android:layout_marginRight">20dp</item>
+        <item name="android:layout_marginBottom">10dp</item>
+    </style>
+
+    <!--个人信息样式-->
+    <style name="PersonalInfoTextStyle">
+        <item name="android:textSize">15sp</item>
+        <item name="android:layout_gravity">center_vertical</item>
+        <item name="android:layout_marginLeft">15dp</item>
+    </style>
 </resources>

@@ -1,11 +1,14 @@
 package com.timemanage.view.fragment;
 
+import android.app.Application;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 
 import com.github.mikephil.charting.animation.Easing;
 import com.github.mikephil.charting.charts.PieChart;
@@ -15,6 +18,8 @@ import com.github.mikephil.charting.data.PieData;
 import com.github.mikephil.charting.data.PieDataSet;
 import com.github.mikephil.charting.formatter.PercentFormatter;
 import com.timemanage.R;
+import com.timemanage.db.DataBaseManager;
+import com.timemanage.view.activity.MainActivity;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -49,10 +54,7 @@ public class PieChartFragment extends BaseFragment {
         if (mView == null){
             mView = inflater.inflate(R.layout.fragment_piechart,container,false);
             pieChart = (PieChart) mView.findViewById(R.id.fag_piechart);
-
             initView();
-
-
         }
         return mView;
     }
