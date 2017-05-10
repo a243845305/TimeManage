@@ -14,6 +14,7 @@ import com.timemanage.TimeManageAppliaction;
 import com.timemanage.bean.AppInfo;
 import com.timemanage.bean.User;
 import com.timemanage.utils.LogUtil;
+import com.timemanage.utils.UserInfoUtil;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -28,11 +29,11 @@ public class DataBaseManager {
     String TAG = "DataBaseManager";
     private DataBaseHelper helper;
     private SQLiteDatabase db;
-    private static final DataBaseManager dbManager = new DataBaseManager(TimeManageAppliaction.getContext());
-
-    public static DataBaseManager getDbManager(){
-        return dbManager;
-    }
+//    private static final DataBaseManager dbManager = new DataBaseManager(TimeManageAppliaction.getContext());
+//
+//    public static DataBaseManager getDbManager(){
+//        return dbManager;
+//    }
 
     public DataBaseManager(Context context) {
 
@@ -47,17 +48,45 @@ public class DataBaseManager {
         User user = new User();
         String sql = "select * from t_user where username = '" + username + "' and password = '" + password + "';";
         Cursor cursor = db.rawQuery(sql, null);
+        while (cursor.moveToNext()){
+            user.setUserId(cursor.getInt(cursor.getColumnIndex("userid")));
+            user.setUserName(cursor.getString(cursor.getColumnIndex("username")));
+            user.setUserId(Integer.parseInt(cursor.getString(cursor.getColumnIndex("userid"))));
+            user.setUserImg(cursor.getString(cursor.getColumnIndex("userimg")));
+        }
 
-        user.setUserId(cursor.getInt(cursor.getColumnIndex("userid")));
-        user.setUserName(cursor.getString(cursor.getColumnIndex("username")));
-        user.setUserId(Integer.parseInt(cursor.getString(cursor.getColumnIndex("userid"))));
+//        byte[] image = cursor.getBlob(cursor.getColumnIndex("userimg"));
+//        ByteArrayInputStream bais = new ByteArrayInputStream(image);
+//        Drawable userImg = Drawable.createFromStream(bais, "imageflag");
 
-        byte[] image = cursor.getBlob(cursor.getColumnIndex("userimg"));
-        ByteArrayInputStream bais = new ByteArrayInputStream(image);
-        Drawable userImg = Drawable.createFromStream(bais, "imageflag");
-
-        user.setUserImg(userImg);
         return user;
+    }
+
+    public boolean updateUserInfo(User user){
+        boolean isSuccess = false;
+        db.beginTransaction();// 开始事务
+        try {
+            ContentValues cv = new ContentValues();
+
+            cv.put("usernickname", user.getNickName());
+            cv.put("usersex", user.getSex());
+            cv.put("userimg", user.getUserImg());
+            cv.put("signature",user.getSignature());
+
+            String[] args = {String.valueOf(user.getUserName())};
+            int i = db.update("t_user", cv, "username=? ", args);
+
+            if (i > 0) {
+                isSuccess = true;
+            } else {
+                isSuccess = false;
+            }
+
+            db.setTransactionSuccessful();// 事务成功
+        }finally {
+            db.endTransaction();// 结束事务
+        }
+        return isSuccess;
     }
 
     public boolean isExiteByUserName(String userName){
@@ -90,7 +119,7 @@ public class DataBaseManager {
 
             values.put("username", user.getUserName());
             values.put("password", user.getPassWord());
-            values.put("userimg", getPicture(user.getUserImg()));
+            values.put("userimg", user.getUserImg());
 
              i = db.insert("t_user", "userid", values);
 
@@ -147,12 +176,12 @@ public class DataBaseManager {
             for (AppInfo info : AppInfos) {
                 ContentValues values = new ContentValues();
 
-                values.put("userid", 1);
+                values.put("userid", UserInfoUtil.getUserId());
                 values.put("appname", info.getAppName());
                 values.put("apppackagename", info.getAppPackageName());
                 values.put("year", year);
-                values.put("month", month + 1);
-                values.put("day", day + 1);
+                values.put("month", month);
+                values.put("day", day);
                 values.put("appduration", info.getAppDuration());
 
                 db.insert("t_apptime", "logid", values);
@@ -194,7 +223,7 @@ public class DataBaseManager {
                     final ByteArrayOutputStream os = new ByteArrayOutputStream();
                     bmp.compress(Bitmap.CompressFormat.PNG, 100, os);
 
-                    values.put("userid", 1);
+                    values.put("userid", UserInfoUtil.getUserId());
                     values.put("appname", info.getAppName());
                     values.put("appicon", os.toByteArray());
                     values.put("apppackagename", info.getAppPackageName());

@@ -39,6 +39,7 @@ public class LoginPresenter implements ILoginPresenter {
 
     public LoginPresenter(ILoginActivity iLoginActivty) {
         this.iLoginActivty = iLoginActivty;
+        LogUtil.e("LoginAContext::::",TimeManageAppliaction.getContext().toString());
         mCache = ACache.get(TimeManageAppliaction.getContext());
     }
 
@@ -103,20 +104,21 @@ public class LoginPresenter implements ILoginPresenter {
             public void run() {
                 try {
                     Thread.sleep(WAITTIME);
-                    User user = new User();
+                    User user = null;
                     user = dbManager.findUserByUNameandPwd(strPhone,password);
-                    if (user != null){
+                    if (user.getUserName() != null){
                         //查询成功，将用户信息保存
                         mCache.put(ConstantUtil.CACHE_KEY, user);
                         //登录成功,获取用户信息成功，跳转到主界面
                         iLoginActivty.showProgress(CLOSEPROGRESS);
-                        iLoginActivty.showLoginSucceed();
 
                         Intent intent = new Intent(TimeManageAppliaction.getContext(), MainActivity.class);
                         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                         TimeManageAppliaction.getContext().startActivity(intent);
                         //将登录页面finish掉
                         iLoginActivty.finishLoginActivity();
+
+                        iLoginActivty.showLoginSucceed();
                     }else {
                         //查询失败
                         iLoginActivty.showProgress(CLOSEPROGRESS);

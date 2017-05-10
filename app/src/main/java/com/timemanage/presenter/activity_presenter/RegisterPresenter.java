@@ -30,6 +30,7 @@ public class RegisterPresenter implements IRegisterPresenter {
     private static boolean SHOWPROGRESS = true;             //显示progress
     private static boolean CLOSEPROGRESS = false;           //关闭progress
 
+
     private DataBaseManager dbManager;
     private String VERIFY_UUID = new String();
     private IRegisterActivity iRegisterActivity;
@@ -38,6 +39,7 @@ public class RegisterPresenter implements IRegisterPresenter {
     private String password2;
     private User user;
     private ACache mCache;
+
 
 
     public RegisterPresenter(IRegisterActivity iRegisterActivity) {
@@ -56,6 +58,7 @@ public class RegisterPresenter implements IRegisterPresenter {
         username = iRegisterActivity.getUsername();
         password = iRegisterActivity.getPassword();
         password2 = iRegisterActivity.getPassword2();
+        dbManager = new DataBaseManager(TimeManageAppliaction.getContext());
     }
 
     /**
@@ -120,21 +123,21 @@ public class RegisterPresenter implements IRegisterPresenter {
             public void run() {
                 try {
                     Thread.sleep(WAITTIME);
-                    if (!DataBaseManager.getDbManager().isExiteByUserName(username)){
+                    if (!dbManager.isExiteByUserName(username)){
                         //数据库中没有该用户，允许注册
                         user = new User();
                         user.setUserName(username);
                         user.setPassWord(password);
                         user.setUserImg(null);
-                        boolean flog = DataBaseManager.getDbManager().insertUserInfo(user);
+                        boolean flog = dbManager.insertUserInfo(user);
                         if (flog){
                             //将用户信息查出，存入缓存中
-                            user = DataBaseManager.getDbManager().findUserByUNameandPwd(username,password);
+                            user = dbManager.findUserByUNameandPwd(username,password);
                             mCache.put(ConstantUtil.CACHE_KEY, user);
 
                             //注册成功，跳转到主界面
-                            iRegisterActivity.showRegisteSucceed();
                             iRegisterActivity.showProgress(CLOSEPROGRESS);
+                            iRegisterActivity.showRegisteSucceed();
                             Intent intent = new Intent(TimeManageAppliaction.getContext(), MainActivity.class);
                             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                             TimeManageAppliaction.getContext().startActivity(intent);
@@ -142,13 +145,13 @@ public class RegisterPresenter implements IRegisterPresenter {
                             iRegisterActivity.finishRegisterActivity();
                         }else {
                             //注册失败，不跳转，提示信息
-                            iRegisterActivity.showRegistFailed();
                             iRegisterActivity.showProgress(CLOSEPROGRESS);
+                            iRegisterActivity.showRegistFailed();
                         }
                     }else {
                         //数据库中已经存在该用户
-                        iRegisterActivity.showRegistFailed();
                         iRegisterActivity.showProgress(CLOSEPROGRESS);
+                        iRegisterActivity.showRegistFailed();
                     }
 
                 } catch (InterruptedException e) {

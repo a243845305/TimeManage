@@ -29,9 +29,11 @@ import android.widget.Toast;
 
 import com.amitshekhar.DebugDB;
 import com.timemanage.R;
+import com.timemanage.TimeManageAppliaction;
 import com.timemanage.adapter.FragmentAdapter;
 import com.timemanage.db.DataBaseHelper;
 import com.timemanage.db.DataBaseManager;
+import com.timemanage.utils.ACache;
 import com.timemanage.utils.ActivityCollectorUtil;
 import com.timemanage.utils.ConstantUtil;
 import com.timemanage.utils.LogUtil;
@@ -49,9 +51,9 @@ public class MainActivity extends BaseActivity
     private static String[] PERMISSIONS_STORAGE = {
             Manifest.permission.READ_EXTERNAL_STORAGE,
             Manifest.permission.WRITE_EXTERNAL_STORAGE};
-
     private long currentBackPressedTime = 0;
     private static final int BACK_PRESSED_INTERVAL = 2000;
+
     private TabLayout tabLayout;
     private Toolbar toolbar;
     private DrawerLayout drawer;
@@ -64,7 +66,8 @@ public class MainActivity extends BaseActivity
     private List<Fragment> fmList;
     private FragmentAdapter fmAdapter;
 
-    public static DataBaseManager dbManager;
+    private DataBaseManager dbManager;
+    private ACache mCache;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,15 +76,19 @@ public class MainActivity extends BaseActivity
 
         setContentView(R.layout.activity_main);
         verifyStoragePermissions(this);
+
         //数据库初始化操作
         dbManager = new DataBaseManager(this);
-        LogUtil.e("LOOOOOOK","Here!!!!!!!!!!");
+        LogUtil.e("LOOOOOOK", "Here!!!!!!!!!!");
         DebugDB.getAddressLog();
+        mCache = ACache.get(TimeManageAppliaction.getContext());
+
         //启动前台Service
         Intent startServiceIntent = new Intent();
         ComponentName componentName = new ComponentName(ConstantUtil.pkgName, ConstantUtil.serviceName);
         startServiceIntent.setComponent(componentName);
         this.startService(startServiceIntent);
+
         initView();
 
     }
@@ -184,20 +191,26 @@ public class MainActivity extends BaseActivity
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
         int id = item.getItemId();
-
-//        if (id == R.id.nav_camara) {
-//            // Handle the camera action
-//        } else if (id == R.id.nav_gallery) {
-//
-//        } else if (id == R.id.nav_slideshow) {
-//
-//        } else
-        if (id == R.id.nav_manage) {
-
-        } else if (id == R.id.nav_share) {
-
-        } else if (id == R.id.nav_send) {
-
+        switch (id) {
+            case R.id.nav_manage:
+                break;
+            case R.id.nav_share:
+                break;
+            case R.id.nav_send:
+                break;
+            case R.id.nav_gallery:
+                Intent intent = new Intent(MainActivity.this, PersonalCompileActivity.class);
+                MainActivity.this.startActivity(intent);
+                break;
+            case R.id.nav_logout:
+                ActivityCollectorUtil.finishAll();
+                //删除所用缓存
+                mCache.clear();
+                Intent intent2 = new Intent(MainActivity.this, LoginActivity.class);
+                startActivity(intent2);
+                break;
+            default:
+                break;
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);

@@ -22,8 +22,7 @@ import java.util.Map;
 
 /**
  * Created by Yawen_Li on 2016/4/22.
- * <p/>
- * 目前的问题：服务器更新用户信息接口有问题，错误代码500 错误信息Server error
+ *
  */
 public class PersonalCompilePresenter implements IPersonalCompilePresenter {
 
@@ -33,22 +32,15 @@ public class PersonalCompilePresenter implements IPersonalCompilePresenter {
     private Handler handler;
     private Context context;
     private String uploadFilePath;
-    private UploadManager uploadManager;
+//    private UploadManager uploadManager;
     private User user;
 
     private String uploadToken;
     private String domain;
 
-    private String industry;
-    private String scale;
-    private String avatar;
-    private String realName;
-    private String address;
-    private String id;
 
 
     /**
-     * 请求部分还没写完
      *
      * @param iPersonalCompileActivity
      * @param context
@@ -60,14 +52,14 @@ public class PersonalCompilePresenter implements IPersonalCompilePresenter {
         this.mCache = ACache.get(context);
         this.handler = handler;
         this.context = context;
-        authToken = UserInfoUtil.findAuthToken();
-        user = getData();
-        setAvatar();
-        getUploadToken();
+//        authToken = UserInfoUtil.findAuthToken();
+//        user = getData();
+//        setAvatar();
+//        getUploadToken();
     }
 
 
-    //获取上传图片权限token
+    /*//获取上传图片权限token
     private void getUploadToken() {
         Call<JsonObject> call = RetrofitUtil.getRetrofit().create(IUploadToken.class).getUploadToken(authToken);
         call.enqueue(new Callback<JsonObject>() {
@@ -214,11 +206,11 @@ public class PersonalCompilePresenter implements IPersonalCompilePresenter {
     public User getData() {
         user = (User) mCache.getAsObject(ConstantUtil.CACHE_KEY);
         return user;
-    }
+    }*/
 
-    /**
+   /* *//**
      * 获取用户信息数据
-     */
+     *//*
     @Override
     public void requestUserData() {
         authToken = UserInfoUtil.findAuthToken();
@@ -248,7 +240,7 @@ public class PersonalCompilePresenter implements IPersonalCompilePresenter {
                 //请求失败
             }
         });
-    }
+    }*/
 
 //------------------接口方法结束---------------------
 }

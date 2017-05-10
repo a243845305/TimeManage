@@ -4,7 +4,7 @@
     <color name="deepgreen">#02791c</color>
 
     <!--主色调-->
-    <color name="mainColor">#00b5ad</color>
+    <color name="mainColor">#26a69a</color>
     <!--白灰色-->
     <color name="tintGrey">#f9fafa</color>
     <!--白浅灰色-->
@@ -27,6 +27,17 @@
     <color name="gray">#696969</color>
     <color name="deepgray">#484040</color>
 
+    <!--标题栏过度色-->
+    <color name="black_20">#33000000</color>
+    <color name="transparent">#00000000</color>
+    <color name="devideLine">#BBB</color>
+    <color name="icon_enabled">#00ffffff</color>
+    <color name="icon_disabled">#4CAF50</color>
+    <color name="text_enabled">#FFFFFFFF</color>
+    <color name="text_disabled">#4DFFFFFF</color>
+    <color name="colorwhite">#FFFFFF</color>
+    <color name="littleColor">#838383</color>
+    <color name="little_black">#464648</color>
 
     <eat-comment/>
     <color name="background">#181819</color>

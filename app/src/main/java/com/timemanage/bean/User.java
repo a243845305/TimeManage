@@ -11,9 +11,12 @@ public class User implements Serializable {
     private int userId;
     private String userName;
     private String passWord;
-    private Drawable userImg;
+    private String sex;
+    private String signature;
+    private String nickName;
+    private String userImg;
 
-    public User(String userName, String passWord, Drawable userImg, int userId){
+    public User(String userName, String passWord, String userImg, int userId){
         this.userName = userName;
         this.passWord = passWord;
         this.userImg = userImg;
@@ -22,6 +25,30 @@ public class User implements Serializable {
 
     public User(){
 
+    }
+
+    public String getSex() {
+        return sex;
+    }
+
+    public void setSex(String sex) {
+        this.sex = sex;
+    }
+
+    public String getSignature() {
+        return signature;
+    }
+
+    public void setSignature(String signature) {
+        this.signature = signature;
+    }
+
+    public String getNickName() {
+        return nickName;
+    }
+
+    public void setNickName(String nickName) {
+        this.nickName = nickName;
     }
 
     public int getUserId() {
@@ -48,11 +75,11 @@ public class User implements Serializable {
         this.passWord = passWord;
     }
 
-    public Drawable getUserImg() {
+    public String getUserImg() {
         return userImg;
     }
 
-    public void setUserImg(Drawable userImg) {
+    public void setUserImg(String userImg) {
         this.userImg = userImg;
     }
 }

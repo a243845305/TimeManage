@@ -39,6 +39,7 @@
             android:layout_marginLeft="20dp"
             android:layout_marginRight="20dp"
             android:hint="请输入手机号"
+            android:inputType="phone"
             android:textSize="16sp" />
 
         <EditText
@@ -58,7 +59,7 @@
             android:layout_marginLeft="20dp"
             android:layout_marginRight="20dp"
             android:hint="请再次输入密码"
-            android:inputType="phone"
+            android:inputType="textPassword"
             android:textSize="16sp" />
 
 

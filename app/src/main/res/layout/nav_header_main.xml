@@ -11,13 +11,14 @@
 
     <ImageView android:layout_width="wrap_content" android:layout_height="wrap_content"
         android:paddingTop="@dimen/nav_header_vertical_spacing"
-        android:src="@android:drawable/sym_def_app_icon" android:id="@+id/imageView" />
+        android:src="@mipmap/img_appicon_64px" android:id="@+id/head_iv_userImg" />
 
-    <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
-        android:paddingTop="@dimen/nav_header_vertical_spacing" android:text="Android Studio"
+    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+        android:id="@+id/head_tv_username"
+        android:paddingTop="@dimen/nav_header_vertical_spacing" android:text="@string/app_name"
         android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
 
     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-        android:text="android.studio@android.com" android:id="@+id/textView" />
+        android:text="243845305@qq.com" android:id="@+id/textView" />
 
 </LinearLayout>

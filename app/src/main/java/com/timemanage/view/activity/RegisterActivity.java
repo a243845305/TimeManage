@@ -2,6 +2,7 @@ package com.timemanage.view.activity;
 
 import android.app.ProgressDialog;
 import android.os.Bundle;
+import android.os.Looper;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -122,7 +123,9 @@ public class RegisterActivity extends BaseActivity implements IRegisterActivity,
      */
     @Override
     public void showRegisteSucceed() {
+        Looper.prepare();
         Toast.makeText(RegisterActivity.this, "注册成功", Toast.LENGTH_SHORT).show();
+        Looper.loop();
     }
 
     /**
@@ -130,7 +133,9 @@ public class RegisterActivity extends BaseActivity implements IRegisterActivity,
      */
     @Override
     public void showRegistFailed() {
+        Looper.prepare();
         Toast.makeText(RegisterActivity.this, "用户名或手机号已经存在", Toast.LENGTH_SHORT).show();
+        Looper.loop();
     }
 
 

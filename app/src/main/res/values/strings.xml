@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">TimeManage</string>
 
@@ -6,13 +7,17 @@
 
     <string name="action_settings">Settings</string>
 
+    <string name="TimeManage">TimeManage</string>
+    <string name="welcome">您的时间管家</string>
     <!--personal_information-->
     <string name="personal_information">个人信息</string>
     <string name="head_portrait">头像</string>
-    <string name="nickname">用户名</string>
+    <string name="username">用户名</string>
     <string name="set_nickname">编辑昵称:</string>
     <string name="telephone">手机号</string>
-    <string name="realName">真实姓名</string>
+    <string name="nickname">昵称</string>
+    <string name="sex">性别</string>
+    <string name="signature">个性签名</string>
     <string name="industry">行业</string>
     <string name="scale">规模</string>
     <string name="address">地址</string>

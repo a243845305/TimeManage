@@ -13,7 +13,14 @@ public class ConstantUtil {
 
     //============================整形常量的定义===================================
 
+    //获取网络的数据
+    public static final int GET_NET_DATA = 0x00000002;
+    //启动activity
+    public static final int START_ACTIVITY = 0x00000009;
+
     //登录成功之后的缓存文件名（主要为了保存authToken）
     public static final String CACHE_KEY = "Cache_User";
+    //用户头像存放文件名
+    public static final String AVATAR_FILE_PATH = "/timamanage_avatar.jpg";
 
 }

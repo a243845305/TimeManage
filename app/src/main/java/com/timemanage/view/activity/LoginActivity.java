@@ -4,6 +4,7 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Looper;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -123,17 +124,23 @@ public class LoginActivity extends BaseActivity implements ILoginActivity, View.
 
     @Override
     public void showLoginSucceed() {
+        Looper.prepare();
         Toast.makeText(LoginActivity.this, "登录成功", Toast.LENGTH_SHORT).show();
+        Looper.loop();
     }
 
     @Override
     public void showLoginFailed() {
+        Looper.prepare();
         Toast.makeText(LoginActivity.this, "手机号与密码错误", Toast.LENGTH_SHORT).show();
+        Looper.loop();
     }
 
     @Override
     public void showRequestTimeout() {
+        Looper.prepare();
         Toast.makeText(LoginActivity.this, "登录超时，请检查网络", Toast.LENGTH_LONG).show();
+        Looper.loop();
     }
 
     @Override

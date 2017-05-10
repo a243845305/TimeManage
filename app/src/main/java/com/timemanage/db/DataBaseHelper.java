@@ -35,7 +35,10 @@ public class DataBaseHelper extends SQLiteOpenHelper {
         String sql = "create table if not exists t_user(userid integer primary key autoincrement ," +
                 "username text not null , " +
                 "password text not null ," +
-                "userimg bolb);";
+                "userimg bolb ," +
+                "usersex text ," +
+                "signature text ," +
+                "usernickname text);";
         String sql1 = "create table if not exists t_app(appid integer primary key autoincrement ," +
                 "userid integer not null ," +
                 "appname text not null ," +

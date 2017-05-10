@@ -10,6 +10,7 @@ import android.support.annotation.Nullable;
 import android.text.format.Time;
 
 import com.timemanage.R;
+import com.timemanage.TimeManageAppliaction;
 import com.timemanage.bean.AppInfo;
 import com.timemanage.db.DataBaseHelper;
 import com.timemanage.db.DataBaseManager;
@@ -18,6 +19,7 @@ import com.timemanage.utils.ConstantUtil;
 import com.timemanage.utils.LogUtil;
 import com.timemanage.view.activity.MainActivity;
 
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -33,6 +35,7 @@ public class TimeManageService extends MyIntentService {
     private DataBaseManager dbManager;
     private List<AppInfo> appInfos;
     private Time t;
+    private Calendar c;
     private Date date;
 
     public TimeManageService() {
@@ -47,15 +50,16 @@ public class TimeManageService extends MyIntentService {
         PendingIntent contentIntent = PendingIntent.getActivity(this, 0,
                 new Intent(this, MainActivity.class), 0);
         builder.setContentIntent(contentIntent);
-        builder.setSmallIcon(R.mipmap.ic_launcher);
+        builder.setSmallIcon(R.mipmap.img_appicon_64px);
         builder.setTicker("Foreground Service Start");
-        builder.setContentTitle("Foreground Service");
-        builder.setContentText("Make this service run in the foreground.");
+        builder.setContentTitle("TimeManage Service");
+        builder.setContentText("TimeManage正在为您提供服务");
         Notification notification = builder.build();
         startForeground(1, notification);
 
         date = new Date();
         t = new Time("GMT+8");
+        c = Calendar.getInstance();
         isScreenOn = true;
         dbManager = new DataBaseManager(this);
 
@@ -94,7 +98,7 @@ public class TimeManageService extends MyIntentService {
                     count++;
                 }
                 dbManager.insertAppContentsTot_app(appInfos);
-        }
+            }
         }.start();
     }
 
@@ -109,6 +113,11 @@ public class TimeManageService extends MyIntentService {
         while(isScreenOn){
             String foregroundProcess = ApkUtil.getForegroundApp(TimeManageService.this.getPackageManager());
             if (foregroundProcess != null){
+                try {
+                    Thread.sleep(2000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
                 for (AppInfo appInfo: appInfos){
                     if (foregroundProcess.equals(appInfo.getAppPackageName())){
                         int d = Integer.parseInt(appInfo.getAppDuration());
@@ -120,17 +129,16 @@ public class TimeManageService extends MyIntentService {
                 LogUtil.e("foregroundProcess:",foregroundProcess);
             }
 
-            t.setToNow();
-            int year = t.year;
-            int month = t.month;
-            int day = t.monthDay;
-            int minute = t.minute;
-            int hour = t.hour;
-            LogUtil.e("Now minute:::::",minute+""+"hour:::"+hour);
-            if (hour-16 == 0 && minute == 0){
+            int year = c.get(Calendar.YEAR);
+            int month = c.get(Calendar.MONTH);
+            int day = c.get(Calendar.DAY_OF_MONTH);
+            int minute = c.get(Calendar.MINUTE);
+            int hour =  c.get(Calendar.HOUR_OF_DAY);
+            LogUtil.e("Now minute:::::",minute+""+"hour:::"+hour+"   month::::"+month+"   day:::"+day+"   year:::"+year);
+            if (hour == 20 && minute == 35){
                 //每到零点时进行插入数据操作
-                //不知为什么小时取出多了16，可能是时区的缘故吧
-                dbManager.insertAppDurationTot_apptime(appInfos,year,month,day);
+                //月份需要加1
+                dbManager.insertAppDurationTot_apptime(appInfos,year,month+1,day);
             }
 
             if (minute == 0){
@@ -139,7 +147,7 @@ public class TimeManageService extends MyIntentService {
             }
 
             try {
-                Thread.sleep(60*1000);
+                Thread.sleep(6*1000);
             } catch (InterruptedException e) {
                 throw new RuntimeException("interrupted",e);
             }

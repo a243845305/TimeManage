@@ -6,11 +6,15 @@ import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 import android.provider.MediaStore;
 import android.support.v7.app.AlertDialog;
@@ -31,10 +35,16 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.timemanage.R;
+import com.timemanage.TimeManageAppliaction;
 import com.timemanage.bean.User;
+import com.timemanage.db.DataBaseManager;
 import com.timemanage.presenter.activity_presenter.PersonalCompilePresenter;
 import com.timemanage.presenter.activity_presenter_interface.IPersonalCompilePresenter;
+import com.timemanage.utils.ACache;
+import com.timemanage.utils.ConstantUtil;
+import com.timemanage.utils.ImageUtils;
 import com.timemanage.utils.LogUtil;
+import com.timemanage.utils.NetUtil;
 import com.timemanage.view.activity_interface.IPersonalCompileActivity;
 import com.timemanage.widgets.RoundImageView;
 
@@ -50,9 +60,13 @@ public class PersonalCompileActivity extends BaseActivity implements View.OnClic
 
     private ImageButton ib_Back;        //返回按钮
     private RoundImageView rw_Head;     //头像图标按钮
+    private TextView tv_UserName;       //用户名
     private TextView tv_UserNick;       //昵称
-    private Button btn_logout;          //完成按钮
+    private TextView tv_Sex;            //性别
+    private TextView tv_Signature;      //签名
+    private Button btn_finish;          //完成按钮
 
+    private RelativeLayout rl_head, rl_sex, rl_signature, rl_nickname;
     private ProgressDialog pdUpdatawait;
     private User user;
 
@@ -68,45 +82,43 @@ public class PersonalCompileActivity extends BaseActivity implements View.OnClic
     private String compilestr;  //编辑后的文本
 
     private IPersonalCompilePresenter iPersonalCompilePresenter;
+    private ACache mCache;
+    private DataBaseManager dbManager;
+    private String strUserImg;
     private Handler handler;
 
-    private String citystr;
-    private String codeStr;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_persional_compile);
-        handler = new MyHandler(PersonalCompileActivity.this);
+//        handler = new MyHandler(PersonalCompileActivity.this);
         //将Activity与Presenter进行绑定
         iPersonalCompilePresenter = new PersonalCompilePresenter(PersonalCompileActivity.this, PersonalCompileActivity.this, handler);
 
-        Log.e("PersonalCA", "userAvatar:" + UserInfoUtil.getUserAvatar());
+//        Log.e("PersonalCA", "userAvatar:" + UserInfoUtil.getUserAvatar());
         initView();
     }
 
     private void initView() {
         ib_Back = (ImageButton) this.findViewById(R.id.ib_back);
         rw_Head = (RoundImageView) this.findViewById(R.id.rw_head);
-        tv_UserNick = (TextView) this.findViewById(R.id.tv_user_nick);
-        tv_PhoneNumber = (TextView) this.findViewById(R.id.tv_phone_number);
-        tv_UserAddress = (TextView) this.findViewById(R.id.tv_user_address);
-        tv_UserType = (TextView) this.findViewById(R.id.tv_user_type);
-        tv_UserIndustry = (TextView) this.findViewById(R.id.tv_industry);
-        tv_UserRealName = (TextView) this.findViewById(R.id.tv_realName);
-        tv_UserScale = (TextView) this.findViewById(R.id.tv_scale);
+        tv_UserName = (TextView) this.findViewById(R.id.tv_username);
+        tv_UserNick = (TextView) this.findViewById(R.id.tv_nickname);
+        tv_Sex = (TextView) findViewById(R.id.tv_sex);
+        tv_Signature = (TextView) findViewById(R.id.tv_signature);
         btn_finish = (Button) this.findViewById(R.id.btn_finish);
-        rl_head = (RelativeLayout) this.findViewById(R.id.rl_head);
-        rl_name = (RelativeLayout) this.findViewById(R.id.rl_name);
-        rl_address = (RelativeLayout) this.findViewById(R.id.rl_address);
-        rl_industry = (RelativeLayout) this.findViewById(R.id.rl_industry);
-        rl_scale = (RelativeLayout) this.findViewById(R.id.rl_scale);
 
-        rl_industry.setOnClickListener(this);
-        rl_scale.setOnClickListener(this);
+        rl_head = (RelativeLayout) this.findViewById(R.id.rl_head);
+        rl_sex = (RelativeLayout) this.findViewById(R.id.rl_sex);
+        rl_signature = (RelativeLayout) this.findViewById(R.id.rl_signature);
+        rl_nickname = (RelativeLayout) this.findViewById(R.id.rl_nickname);
+
+        rl_nickname.setOnClickListener(this);
+        rl_sex.setOnClickListener(this);
+        rl_signature.setOnClickListener(this);
         rl_head.setOnClickListener(this);
-        rl_name.setOnClickListener(this);
-        rl_address.setOnClickListener(this);
+
         ib_Back.setOnClickListener(this);
         btn_finish.setOnClickListener(this);
 
@@ -115,13 +127,16 @@ public class PersonalCompileActivity extends BaseActivity implements View.OnClic
         pdUpdatawait.setCanceledOnTouchOutside(false);
         pdUpdatawait.setCancelable(true);
 
-        user = iPersonalCompilePresenter.getData();
+        dbManager = new DataBaseManager(TimeManageAppliaction.getContext());
+
+        mCache = ACache.get(TimeManageAppliaction.getContext());
+        user = (User) mCache.getAsObject(ConstantUtil.CACHE_KEY);
         updataView(user);
-        if (NetUtil.isNetAvailable(PersonalCompileActivity.this)){
-            iPersonalCompilePresenter.requestUserData();
-        }else {
-            showNoNet();
-        }
+//        if (NetUtil.isNetAvailable(PersonalCompileActivity.this)) {
+////            iPersonalCompilePresenter.requestUserData();
+//        } else {
+//            showNoNet();
+//        }
     }
 
 
@@ -134,29 +149,55 @@ public class PersonalCompileActivity extends BaseActivity implements View.OnClic
             case R.id.rl_head:
                 showPhotoDialog();
                 break;
-            case R.id.rl_name:
-                compilestr = tv_UserRealName.getText().toString()+"en";
-                showCompileDialog(R.id.rl_name);
+            case R.id.rl_nickname:
+                compilestr = tv_UserNick.getText().toString() + "en";
+                showCompileDialog(R.id.rl_nickname);
                 break;
-            case R.id.rl_industry:
-                compilestr = tv_UserIndustry.getText().toString();
-                showCompileDialog(R.id.rl_industry);
+            case R.id.rl_sex:
+                compilestr = tv_Sex.getText().toString();
+                showCompileDialog(R.id.rl_sex);
                 break;
-            case R.id.rl_scale:
-                compilestr = tv_UserScale.getText().toString();
-                showCompileDialog(R.id.rl_scale);
+            case R.id.rl_signature:
+                compilestr = tv_Signature.getText().toString();
+                showCompileDialog(R.id.rl_signature);
                 break;
-            case R.id.rl_address:
-                //TODO 将populwindow写到这
-                showAddressSelector();
-                break;
+//            case R.id.rl_address:
+//                //TODO 将populwindow写到这
+//                showAddressSelector();
+//                break;
             case R.id.btn_finish:
-                if (NetUtil.isNetAvailable(PersonalCompileActivity.this)){
+//                if (NetUtil.isNetAvailable(PersonalCompileActivity.this)) {
+                    //点击完成按钮后更新本地ACache缓存，更新数据库
                     showProgress(true);
-                    iPersonalCompilePresenter.doUpdate();
-                }else {
-                    showNoNet();
-                }
+                    user.setSex(tv_Sex.getText().toString());
+                    user.setSignature(tv_Signature.getText().toString());
+                    user.setNickName(tv_UserNick.getText().toString());
+                    user.setUserImg(strUserImg);
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                Thread.sleep(1500);
+                                mCache.put(ConstantUtil.CACHE_KEY, user);
+                                boolean flog = dbManager.updateUserInfo(user);
+                                if (flog){
+                                    showProgress(false);
+                                    showUpdataSuccess();
+                                    finish();
+                                }else {
+                                    showUpdataFailed();
+                                }
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }).start();
+
+//                    iPersonalCompilePresenter.doUpdate();
+
+//                } else {
+//                    showNoNet();
+//                }
                 break;
             default:
                 break;
@@ -164,65 +205,62 @@ public class PersonalCompileActivity extends BaseActivity implements View.OnClic
 
     }
 
-    //编辑用户地址dialog
-    public void showAddressSelector() {
-        View view = getLayoutInflater().inflate(R.layout.activity_three_level_linkage, null);
-        TextView btn_cancel = (TextView) view.findViewById(R.id.btn_cancel);
-        TextView btn_finish = (TextView) view.findViewById(R.id.btn_finish);
-        final CityPicker cityPicker = (CityPicker) view.findViewById(R.id.citypicker);
-        final PopupWindow popupWindow = new PopupWindow(view, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-
-        popupWindow.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
-        popupWindow.setAnimationStyle(android.R.style.Animation_Translucent);
-        popupWindow.setBackgroundDrawable(getResources().getDrawable(R.drawable.bg_pop_alert));
-
-        //点击窗口外边消失
-        popupWindow.setOutsideTouchable(true);
-        popupWindow.setFocusable(true);
-        popupWindow.setTouchable(true);
-        //显示位置
-        popupWindow.showAtLocation(rl_address, Gravity.BOTTOM, 0, 0);
-        cityPicker.setOnSelectingListener(new CityPicker.OnSelectingListener() {
-            @Override
-            public void selected(boolean selected) {
-                citystr = cityPicker.getCity_string();
-                codeStr = cityPicker.getCity_code_string();
-            }
-        });
-        btn_finish.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                //TODO 获取最终的数据citystr
-                tv_UserAddress.setText(citystr);
-                popupWindow.dismiss();
-            }
-        });
-        btn_cancel.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                popupWindow.dismiss();
-            }
-        });
-    }
+//    //编辑用户地址dialog
+//    public void showAddressSelector() {
+//        View view = getLayoutInflater().inflate(R.layout.activity_three_level_linkage, null);
+//        TextView btn_cancel = (TextView) view.findViewById(R.id.btn_cancel);
+//        TextView btn_finish = (TextView) view.findViewById(R.id.btn_finish);
+//        final CityPicker cityPicker = (CityPicker) view.findViewById(R.id.citypicker);
+//        final PopupWindow popupWindow = new PopupWindow(view, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+//
+//        popupWindow.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
+//        popupWindow.setAnimationStyle(android.R.style.Animation_Translucent);
+//        popupWindow.setBackgroundDrawable(getResources().getDrawable(R.drawable.bg_pop_alert));
+//
+//        //点击窗口外边消失
+//        popupWindow.setOutsideTouchable(true);
+//        popupWindow.setFocusable(true);
+//        popupWindow.setTouchable(true);
+//        //显示位置
+//        popupWindow.showAtLocation(rl_address, Gravity.BOTTOM, 0, 0);
+//        cityPicker.setOnSelectingListener(new CityPicker.OnSelectingListener() {
+//            @Override
+//            public void selected(boolean selected) {
+//                citystr = cityPicker.getCity_string();
+//                codeStr = cityPicker.getCity_code_string();
+//            }
+//        });
+//        btn_finish.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                //TODO 获取最终的数据citystr
+//                tv_UserAddress.setText(citystr);
+//                popupWindow.dismiss();
+//            }
+//        });
+//        btn_cancel.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                popupWindow.dismiss();
+//            }
+//        });
+//    }
 
     //判断输入是否为空
-    public boolean ismEmpty( String input )
-    {
-        if ( input == null || "".equals( input ) )
+    public boolean ismEmpty(String input) {
+        if (input == null || "".equals(input))
             return true;
 
-        for ( int i = 0; i < input.length(); i++ )
-        {
-            char c = input.charAt( i );
-            if ( c != ' ' && c != '\t' && c != '\r' && c != '\n' )
-            {
+        for (int i = 0; i < input.length(); i++) {
+            char c = input.charAt(i);
+            if (c != ' ' && c != '\t' && c != '\r' && c != '\n') {
                 return false;
             }
         }
         return true;
     }
 
-    //编辑昵称、用户行业、规模 调用的dialog
+    //编辑昵称、用户性别、个性签名 调用的dialog
     private void showCompileDialog(final int id) {
         final EditText et = new EditText(this);
         final AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -235,20 +273,20 @@ public class PersonalCompileActivity extends BaseActivity implements View.OnClic
                     Toast.makeText(PersonalCompileActivity.this, "请输入信息！", Toast.LENGTH_SHORT).show();
                 } else {
                     compilestr = et.getText().toString();
-                    switch (id){
-                        case R.id.rl_name:
-                            tv_UserRealName.setText(compilestr);
+                    switch (id) {
+                        case R.id.rl_nickname:
+                            tv_UserNick.setText(compilestr);
                             break;
-                        case R.id.rl_industry:
-                            tv_UserIndustry.setText(compilestr);
+                        case R.id.rl_sex:
+                            tv_Sex.setText(compilestr);
                             break;
-                        case R.id.rl_scale:
-                            tv_UserScale.setText(compilestr);
+                        case R.id.rl_signature:
+                            tv_Signature.setText(compilestr);
                             break;
                         default:
                             break;
                     }
-                    LogUtil.d("PersonalCompileA","compilestr:"+compilestr);
+                    LogUtil.d("PersonalCompileA", "compilestr:" + compilestr);
                 }
             }
         });
@@ -315,7 +353,7 @@ public class PersonalCompileActivity extends BaseActivity implements View.OnClic
             if (!file.exists()) {
                 file.mkdirs();
             }
-            photoFile = new File(file, System.currentTimeMillis()+"");
+            photoFile = new File(file, System.currentTimeMillis() + "");
 
             Uri photoUri = Uri.fromFile(photoFile);
             LogUtil.d("PersonalCompileA", "文件路径：" + photoUri);
@@ -354,10 +392,11 @@ public class PersonalCompileActivity extends BaseActivity implements View.OnClic
                             if (ImageUtils.saveBitmap2file(photoBitmap)) {
                                 LogUtil.e("PersonalCompileA", "保存图片文件成功");
                                 LogUtil.e("PersonalCompileA", "保存图片路径：" + SDCardRoot + ConstantUtil.AVATAR_FILE_PATH);
-                                String photoPath = SDCardRoot + ConstantUtil.AVATAR_FILE_PATH;
-                                iPersonalCompilePresenter.setImagePath(photoPath);
+                                strUserImg = SDCardRoot + ConstantUtil.AVATAR_FILE_PATH;
+//                                iPersonalCompilePresenter.setImagePath(photoPath);
+
                             }
-                        }catch (Exception e){
+                        } catch (Exception e) {
                             e.printStackTrace();
                         }
                     }
@@ -374,6 +413,7 @@ public class PersonalCompileActivity extends BaseActivity implements View.OnClic
 
     /**
      * 打开系统图片裁剪功能
+     *
      * @param uri
      */
     private void startPhotoZoom(Uri uri) {
@@ -391,99 +431,113 @@ public class PersonalCompileActivity extends BaseActivity implements View.OnClic
         startActivityForResult(intent, HEAD_PORTRAIT_CUT);
     }
 
+//暂时还用不到网络请求数据
 
-    public class MyHandler extends Handler {
-
-        WeakReference<PersonalCompileActivity> weakReference;
-
-        public MyHandler(PersonalCompileActivity fragment) {
-            weakReference = new WeakReference<PersonalCompileActivity>(fragment);
-        }
-
-        @Override
-        public void handleMessage(Message msg) {
-            super.handleMessage(msg);
-            switch (msg.what) {
-                case ConstantUtil.GET_NET_DATA:
-                    user = iPersonalCompilePresenter.getData();
-                    updataView(user);
-                    break;
-                default:
-                    break;
-            }
-        }
-    }
+//    public class MyHandler extends Handler {
+//
+//        WeakReference<PersonalCompileActivity> weakReference;
+//
+//        public MyHandler(PersonalCompileActivity fragment) {
+//            weakReference = new WeakReference<PersonalCompileActivity>(fragment);
+//        }
+//
+//        @Override
+//        public void handleMessage(Message msg) {
+//            super.handleMessage(msg);
+//            switch (msg.what) {
+//                case ConstantUtil.GET_NET_DATA:
+//                    user = iPersonalCompilePresenter.getData();
+//                    updataView(user);
+//                    break;
+//                default:
+//                    break;
+//            }
+//        }
+//    }
 
     private void updataView(User user) {
-        //本地一定存在的
-        tv_UserNick.setText(user.getName());
-        tv_PhoneNumber.setText(user.getPhone());
         //不一定有值
-        if (!ismEmpty(user.getAvatar())){
-            Picasso.with(this)
-                    .load(user.getAvatar())
-                    .placeholder(R.mipmap.img_default_user_portrait_150px)
-                    .error(R.mipmap.img_default_user_portrait_150px)
-                    .into(rw_Head);
-            Log.e("PersonalCA", "avatar:" + user.getAvatar());
+        if (!ismEmpty(user.getNickName())) {
+            tv_UserNick.setText(user.getNickName());
         }
-        if (!ismEmpty(user.getRealName())){
-            tv_UserRealName.setText(user.getRealName());
+        if (!ismEmpty(user.getSex())) {
+            tv_Sex.setText(user.getSex());
         }
-        if (!ismEmpty(user.getAddress())){
-            tv_UserAddress.setText(user.getAddress());
+        if (!ismEmpty(user.getSignature())) {
+            tv_Signature.setText(user.getSignature());
         }
-        if (!ismEmpty(user.getIndustry())){
-            tv_UserIndustry.setText(user.getIndustry());
+        if (!ismEmpty(user.getUserName())) {
+            tv_UserName.setText(user.getUserName());
         }
-        if (!ismEmpty(user.getScale())){
-            tv_UserScale.setText(user.getScale());
+        if (!ismEmpty(user.getUserImg())) {
+            Bitmap bitmap = BitmapFactory.decodeFile(user.getUserImg());
+            rw_Head.setImageBitmap(bitmap);
+//            Picasso.with(this)
+//                    .load(user.getAvatar())
+//                    .placeholder(R.mipmap.img_default_user_portrait_150px)
+//                    .error(R.mipmap.img_default_user_portrait_150px)
+//                    .into(rw_Head);
         }
-        if ("PUBLIC".equals(user.getUserType())) {
-            tv_UserType.setText("普通用户");
-        } else {
-            tv_UserType.setText("专家用户");
-        }
+
+//        if (!ismEmpty(user.getRealName())){
+//            tv_UserRealName.setText(user.getRealName());
+//        }
+//        if (!ismEmpty(user.getAddress())){
+//            tv_UserAddress.setText(user.getAddress());
+//        }
+//        if (!ismEmpty(user.getIndustry())){
+//            tv_UserIndustry.setText(user.getIndustry());
+//        }
+//        if (!ismEmpty(user.getScale())){
+//            tv_UserScale.setText(user.getScale());
+//        }
+//        if ("PUBLIC".equals(user.getUserType())) {
+//            tv_UserType.setText("普通用户");
+//        } else {
+//            tv_UserType.setText("专家用户");
+//        }
     }
 
 
     //--------------------接口方法--------------------
 
     @Override
-    public String getRealName() {
-        return tv_UserRealName.getText().toString();
+    public String getNickName() {
+        return tv_UserNick.getText().toString();
     }
 
 
     @Override
-    public String getUserPosition() {
-        return tv_UserAddress.getText().toString();
+    public String getUserSex() {
+        return tv_Sex.getText().toString();
     }
 
     @Override
-    public String getUserIndustry() {
-        return tv_UserIndustry.getText().toString();
+    public String getUserSignature() {
+        return tv_Signature.getText().toString();
     }
 
-    @Override
-    public String getUserScale() {
-        return tv_UserScale.getText().toString();
-    }
 
     @Override
     public void showUpdataSuccess() {
+        Looper.prepare();
         Toast.makeText(PersonalCompileActivity.this, "修改信息成功", Toast.LENGTH_LONG).show();
+        Looper.loop();
         finish();
     }
 
     @Override
     public void showUpdataFailed() {
+        Looper.prepare();
         Toast.makeText(PersonalCompileActivity.this, "修改信息失败", Toast.LENGTH_LONG).show();
+        Looper.loop();
     }
 
     @Override
     public void showNoNet() {
+        Looper.prepare();
         Toast.makeText(PersonalCompileActivity.this, "请检查网络", Toast.LENGTH_LONG).show();
+        Looper.loop();
     }
 
     @Override
