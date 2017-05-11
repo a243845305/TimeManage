@@ -30,6 +30,8 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.PopupWindow;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -85,6 +87,7 @@ public class PersonalCompileActivity extends BaseActivity implements View.OnClic
     private ACache mCache;
     private DataBaseManager dbManager;
     private String strUserImg;
+    private String strUserSex;
     private Handler handler;
 
 
@@ -150,12 +153,12 @@ public class PersonalCompileActivity extends BaseActivity implements View.OnClic
                 showPhotoDialog();
                 break;
             case R.id.rl_nickname:
-                compilestr = tv_UserNick.getText().toString() + "en";
+                compilestr = tv_UserNick.getText().toString();
                 showCompileDialog(R.id.rl_nickname);
                 break;
             case R.id.rl_sex:
                 compilestr = tv_Sex.getText().toString();
-                showCompileDialog(R.id.rl_sex);
+                showPersonalSexDialog();
                 break;
             case R.id.rl_signature:
                 compilestr = tv_Signature.getText().toString();
@@ -207,7 +210,7 @@ public class PersonalCompileActivity extends BaseActivity implements View.OnClic
 
 //    //编辑用户地址dialog
 //    public void showAddressSelector() {
-//        View view = getLayoutInflater().inflate(R.layout.activity_three_level_linkage, null);
+//        View view = getLayoutInflater().inflate(R.layout.dialog_personal_sex, null);
 //        TextView btn_cancel = (TextView) view.findViewById(R.id.btn_cancel);
 //        TextView btn_finish = (TextView) view.findViewById(R.id.btn_finish);
 //        final CityPicker cityPicker = (CityPicker) view.findViewById(R.id.citypicker);
@@ -260,7 +263,55 @@ public class PersonalCompileActivity extends BaseActivity implements View.OnClic
         return true;
     }
 
-    //编辑昵称、用户性别、个性签名 调用的dialog
+    private void showPersonalSexDialog(){
+        View view = getLayoutInflater().inflate(R.layout.dialog_personal_sex, null);
+        TextView btn_cancel = (TextView) view.findViewById(R.id.btn_cancel);
+        TextView btn_finish = (TextView) view.findViewById(R.id.btn_finish);
+        RadioGroup radioGroup = (RadioGroup) view.findViewById(R.id.rdg_sex);
+        final RadioButton rd_btn_male = (RadioButton) view.findViewById(R.id.rd_btn_male);
+        final RadioButton rd_btn_female = (RadioButton) view.findViewById(R.id.rd_btn_female);
+
+        final PopupWindow popupWindow = new PopupWindow(view, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+
+        popupWindow.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
+        popupWindow.setAnimationStyle(android.R.style.Animation_Translucent);
+        popupWindow.setBackgroundDrawable(getResources().getDrawable(R.drawable.bg_pop_alert));
+
+        //点击窗口外边消失
+        popupWindow.setOutsideTouchable(true);
+        popupWindow.setFocusable(true);
+        popupWindow.setTouchable(true);
+        //显示位置
+        popupWindow.showAtLocation(rl_sex, Gravity.BOTTOM, 0, 0);
+
+        radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(RadioGroup group, int checkedId) {
+                if (checkedId==rd_btn_male.getId()){
+                    strUserSex = "男";
+                }else if (checkedId==rd_btn_female.getId()){
+                    strUserSex = "女";
+                }
+            }
+        });
+
+        btn_finish.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                tv_Sex.setText(strUserSex);
+                popupWindow.dismiss();
+            }
+        });
+        btn_cancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                popupWindow.dismiss();
+            }
+        });
+    }
+
+
+    //编辑昵称、个性签名 调用的dialog
     private void showCompileDialog(final int id) {
         final EditText et = new EditText(this);
         final AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -276,9 +327,6 @@ public class PersonalCompileActivity extends BaseActivity implements View.OnClic
                     switch (id) {
                         case R.id.rl_nickname:
                             tv_UserNick.setText(compilestr);
-                            break;
-                        case R.id.rl_sex:
-                            tv_Sex.setText(compilestr);
                             break;
                         case R.id.rl_signature:
                             tv_Signature.setText(compilestr);

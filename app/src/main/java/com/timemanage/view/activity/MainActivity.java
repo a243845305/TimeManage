@@ -37,6 +37,7 @@ import com.timemanage.utils.ACache;
 import com.timemanage.utils.ActivityCollectorUtil;
 import com.timemanage.utils.ConstantUtil;
 import com.timemanage.utils.LogUtil;
+import com.timemanage.view.fragment.ListAppTimeFragment;
 import com.timemanage.view.fragment.PieChartFragment;
 
 import java.util.ArrayList;
@@ -132,7 +133,8 @@ public class MainActivity extends BaseActivity
         fmList = new ArrayList<Fragment>();
         if (fmList != null) {
 //            fmList.add(new BarChartFragment());
-            fmList.add(new PieChartFragment());
+//            fmList.add(new PieChartFragment());
+            fmList.add(new ListAppTimeFragment());
         }
         fmAdapter = new FragmentAdapter(getSupportFragmentManager(), fmList);
         viewPagerContent.setAdapter(fmAdapter);

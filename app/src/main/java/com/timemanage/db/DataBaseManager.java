@@ -18,6 +18,7 @@ import com.timemanage.utils.UserInfoUtil;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -43,26 +44,30 @@ public class DataBaseManager {
     }
 
 
-//---------------------------------t_user-----------------------------
+    //---------------------------------t_user-----------------------------
     public User findUserByUNameandPwd(String username, String password) {
+        db.beginTransaction();// 开始事务
         User user = new User();
-        String sql = "select * from t_user where username = '" + username + "' and password = '" + password + "';";
-        Cursor cursor = db.rawQuery(sql, null);
-        while (cursor.moveToNext()){
-            user.setUserId(cursor.getInt(cursor.getColumnIndex("userid")));
-            user.setUserName(cursor.getString(cursor.getColumnIndex("username")));
-            user.setUserId(Integer.parseInt(cursor.getString(cursor.getColumnIndex("userid"))));
-            user.setUserImg(cursor.getString(cursor.getColumnIndex("userimg")));
+        try {
+            String sql = "select * from t_user where username = '" + username + "' and password = '" + password + "';";
+            Cursor cursor = db.rawQuery(sql, null);
+            while (cursor.moveToNext()) {
+                user.setUserId(cursor.getInt(cursor.getColumnIndex("userid")));
+                user.setUserName(cursor.getString(cursor.getColumnIndex("username")));
+                user.setUserId(Integer.parseInt(cursor.getString(cursor.getColumnIndex("userid"))));
+                user.setUserImg(cursor.getString(cursor.getColumnIndex("userimg")));
+            }
+            //        byte[] image = cursor.getBlob(cursor.getColumnIndex("userimg"));
+            //        ByteArrayInputStream bais = new ByteArrayInputStream(image);
+            //        Drawable userImg = Drawable.createFromStream(bais, "imageflag");
+            db.setTransactionSuccessful();// 事务成功
+        } finally {
+            db.endTransaction();// 结束事务
         }
-
-//        byte[] image = cursor.getBlob(cursor.getColumnIndex("userimg"));
-//        ByteArrayInputStream bais = new ByteArrayInputStream(image);
-//        Drawable userImg = Drawable.createFromStream(bais, "imageflag");
-
         return user;
     }
 
-    public boolean updateUserInfo(User user){
+    public boolean updateUserInfo(User user) {
         boolean isSuccess = false;
         db.beginTransaction();// 开始事务
         try {
@@ -71,7 +76,7 @@ public class DataBaseManager {
             cv.put("usernickname", user.getNickName());
             cv.put("usersex", user.getSex());
             cv.put("userimg", user.getUserImg());
-            cv.put("signature",user.getSignature());
+            cv.put("signature", user.getSignature());
 
             String[] args = {String.valueOf(user.getUserName())};
             int i = db.update("t_user", cv, "username=? ", args);
@@ -83,13 +88,13 @@ public class DataBaseManager {
             }
 
             db.setTransactionSuccessful();// 事务成功
-        }finally {
+        } finally {
             db.endTransaction();// 结束事务
         }
         return isSuccess;
     }
 
-    public boolean isExiteByUserName(String userName){
+    public boolean isExiteByUserName(String userName) {
         boolean isExite = false;
         Cursor cur = null;
         db.beginTransaction();// 开始事务
@@ -103,14 +108,14 @@ public class DataBaseManager {
             }
 
             db.setTransactionSuccessful();// 事务成功
-        }finally {
+        } finally {
             cur.close();
             db.endTransaction();// 结束事务
         }
         return isExite;
     }
 
-    public boolean insertUserInfo(User user){
+    public boolean insertUserInfo(User user) {
         boolean isExite = false;
         long i = 0;
         db.beginTransaction();// 开始事务
@@ -121,22 +126,23 @@ public class DataBaseManager {
             values.put("password", user.getPassWord());
             values.put("userimg", user.getUserImg());
 
-             i = db.insert("t_user", "userid", values);
+            i = db.insert("t_user", "userid", values);
 
             db.setTransactionSuccessful();// 事务成功
-        }finally {
+        } finally {
             db.endTransaction();// 结束事务
         }
-        if (i != 0){
+        if (i != 0) {
             isExite = true;
-        }else {
+        } else {
             isExite = false;
         }
         return isExite;
     }
+
     //图片转换成可存储的类型
     private byte[] getPicture(Drawable drawable) {
-        if(drawable == null) {
+        if (drawable == null) {
             return null;
         }
         BitmapDrawable bd = (BitmapDrawable) drawable;
@@ -146,7 +152,7 @@ public class DataBaseManager {
         return os.toByteArray();
     }
 
-//---------------------------------t_apptime-----------------------------
+    //---------------------------------t_apptime-----------------------------
     public boolean isExiteByappName(String appPackageName) {
         boolean isExite = false;
         Cursor cur = null;
@@ -163,7 +169,7 @@ public class DataBaseManager {
             }
 
             db.setTransactionSuccessful();// 事务成功
-        }finally {
+        } finally {
             cur.close();
             db.endTransaction();// 结束事务
         }
@@ -208,7 +214,34 @@ public class DataBaseManager {
         }
     }
 
-//---------------------------------t_app-----------------------------
+    public ArrayList<AppInfo> findAppListByDay(int userid, int year, int month, int day, ArrayList<AppInfo> appInfos) {
+        db.beginTransaction();// 开始事务
+        try {
+            for (AppInfo appInfo : appInfos) {
+                String sql = "select * from t_apptime where userid = " + userid  +
+                        " and year = " + year + " and month = " + month +
+                        " and day = " + day + " and apppackagename = " + "'" + appInfo.getAppPackageName() + "';";
+                Cursor cursor = db.rawQuery(sql, null);
+                if (cursor != null){
+                    while (cursor.moveToNext()) {
+                        appInfo.setAppName(cursor.getString(cursor.getColumnIndex("appname")));
+                        appInfo.setAppPackageName(cursor.getString(cursor.getColumnIndex("apppackagename")));
+                        appInfo.setAppDuration(cursor.getString(cursor.getColumnIndex("appduration")));
+
+                        LogUtil.e("DBManageAppInfo=====", "appName:" + appInfo.getAppName() + "  appDuration:" + appInfo.getAppDuration() + "  appIcon:" + appInfo.getAppIcon());
+
+                        appInfos.add(appInfo);
+                    }
+                }
+            }
+            db.setTransactionSuccessful();// 事务成功
+        } finally {
+            db.endTransaction();// 结束事务
+        }
+        return appInfos;
+    }
+
+    //---------------------------------t_app-----------------------------
     public void insertAppContentsTot_app(List<AppInfo> AppInfos) {
         db.beginTransaction();// 开始事务
         try {
@@ -237,6 +270,33 @@ public class DataBaseManager {
         } finally {
             db.endTransaction();// 结束事务
         }
+    }
+
+    public ArrayList<AppInfo> findAppListByUId(int userid) {
+        db.beginTransaction();// 开始事务
+        ArrayList<AppInfo> appInfos = new ArrayList<AppInfo>();
+
+        try {
+            String sql = "select * from t_app where userid = '" + userid + "';";
+            Cursor cursor = db.rawQuery(sql, null);
+            while (cursor.moveToNext()) {
+                AppInfo appInfo = new AppInfo();
+                appInfo.setAppName(cursor.getString(cursor.getColumnIndex("appname")));
+                appInfo.setAppPackageName(cursor.getString(cursor.getColumnIndex("apppackagename")));
+
+                byte[] image = cursor.getBlob(cursor.getColumnIndex("appicon"));
+                ByteArrayInputStream bais = new ByteArrayInputStream(image);
+                Drawable appicon = Drawable.createFromStream(bais, "imageflag");
+                appInfo.setAppIcon(appicon);
+
+                appInfos.add(appInfo);
+            }
+
+            db.setTransactionSuccessful();// 事务成功
+        } finally {
+            db.endTransaction();// 结束事务
+        }
+        return appInfos;
     }
 
     public void closeDB() {

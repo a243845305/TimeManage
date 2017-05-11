@@ -59,7 +59,6 @@ public class TimeManageService extends MyIntentService {
 
         date = new Date();
         t = new Time("GMT+8");
-        c = Calendar.getInstance();
         isScreenOn = true;
         dbManager = new DataBaseManager(this);
 
@@ -128,14 +127,14 @@ public class TimeManageService extends MyIntentService {
                 }
                 LogUtil.e("foregroundProcess:",foregroundProcess);
             }
-
+            c = Calendar.getInstance();
             int year = c.get(Calendar.YEAR);
             int month = c.get(Calendar.MONTH);
             int day = c.get(Calendar.DAY_OF_MONTH);
             int minute = c.get(Calendar.MINUTE);
             int hour =  c.get(Calendar.HOUR_OF_DAY);
             LogUtil.e("Now minute:::::",minute+""+"hour:::"+hour+"   month::::"+month+"   day:::"+day+"   year:::"+year);
-            if (hour == 20 && minute == 35){
+            if (hour == 21 && minute == 16){
                 //每到零点时进行插入数据操作
                 //月份需要加1
                 dbManager.insertAppDurationTot_apptime(appInfos,year,month+1,day);

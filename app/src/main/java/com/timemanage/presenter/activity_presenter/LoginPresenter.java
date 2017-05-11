@@ -112,6 +112,8 @@ public class LoginPresenter implements ILoginPresenter {
                         //登录成功,获取用户信息成功，跳转到主界面
                         iLoginActivty.showProgress(CLOSEPROGRESS);
 
+
+
                         Intent intent = new Intent(TimeManageAppliaction.getContext(), MainActivity.class);
                         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                         TimeManageAppliaction.getContext().startActivity(intent);

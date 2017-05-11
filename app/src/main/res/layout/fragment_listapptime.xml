@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <TextView
+        android:id="@+id/tv_date"
+        android:layout_width="wrap_content"
+        android:layout_height="30dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="5dp"
+        android:gravity="center"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:text="2017/01/27"/>
+        <!--android:background="@drawable/top_text_bg"-->
+    <ListView
+        android:id="@+id/lv_apptimelist"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"></ListView>
+    <include
+        android:id="@+id/emptyView"
+        layout="@layout/empty_view" />
+</LinearLayout>

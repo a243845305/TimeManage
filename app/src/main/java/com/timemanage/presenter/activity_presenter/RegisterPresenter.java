@@ -137,12 +137,12 @@ public class RegisterPresenter implements IRegisterPresenter {
 
                             //注册成功，跳转到主界面
                             iRegisterActivity.showProgress(CLOSEPROGRESS);
-                            iRegisterActivity.showRegisteSucceed();
                             Intent intent = new Intent(TimeManageAppliaction.getContext(), MainActivity.class);
                             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                             TimeManageAppliaction.getContext().startActivity(intent);
                             //将注册页面finish掉
                             iRegisterActivity.finishRegisterActivity();
+                            iRegisterActivity.showRegisteSucceed();
                         }else {
                             //注册失败，不跳转，提示信息
                             iRegisterActivity.showProgress(CLOSEPROGRESS);
