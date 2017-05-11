@@ -134,7 +134,7 @@ public class TimeManageService extends MyIntentService {
             int minute = c.get(Calendar.MINUTE);
             int hour =  c.get(Calendar.HOUR_OF_DAY);
             LogUtil.e("Now minute:::::",minute+""+"hour:::"+hour+"   month::::"+month+"   day:::"+day+"   year:::"+year);
-            if (hour == 21 && minute == 16){
+            if (hour == 21 && minute == 56){
                 //每到零点时进行插入数据操作
                 //月份需要加1
                 dbManager.insertAppDurationTot_apptime(appInfos,year,month+1,day);
@@ -146,7 +146,7 @@ public class TimeManageService extends MyIntentService {
             }
 
             try {
-                Thread.sleep(6*1000);
+                Thread.sleep(25*1000);
             } catch (InterruptedException e) {
                 throw new RuntimeException("interrupted",e);
             }

@@ -20,6 +20,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -48,9 +49,10 @@ public class DataBaseManager {
     public User findUserByUNameandPwd(String username, String password) {
         db.beginTransaction();// 开始事务
         User user = new User();
+        Cursor cursor = null;
         try {
             String sql = "select * from t_user where username = '" + username + "' and password = '" + password + "';";
-            Cursor cursor = db.rawQuery(sql, null);
+            cursor = db.rawQuery(sql, null);
             while (cursor.moveToNext()) {
                 user.setUserId(cursor.getInt(cursor.getColumnIndex("userid")));
                 user.setUserName(cursor.getString(cursor.getColumnIndex("username")));
@@ -62,6 +64,7 @@ public class DataBaseManager {
             //        Drawable userImg = Drawable.createFromStream(bais, "imageflag");
             db.setTransactionSuccessful();// 事务成功
         } finally {
+            cursor.close();
             db.endTransaction();// 结束事务
         }
         return user;
@@ -216,29 +219,34 @@ public class DataBaseManager {
 
     public ArrayList<AppInfo> findAppListByDay(int userid, int year, int month, int day, ArrayList<AppInfo> appInfos) {
         db.beginTransaction();// 开始事务
+        Cursor cursor = null;
+        ArrayList<AppInfo> appInfos1 = new ArrayList<AppInfo>();
         try {
-            for (AppInfo appInfo : appInfos) {
-                String sql = "select * from t_apptime where userid = " + userid  +
+            for (int i = 0; i < appInfos.size(); i++) {
+                AppInfo appInfo = appInfos.get(i);
+                String sql = "select * from t_apptime where userid = " + userid +
                         " and year = " + year + " and month = " + month +
                         " and day = " + day + " and apppackagename = " + "'" + appInfo.getAppPackageName() + "';";
-                Cursor cursor = db.rawQuery(sql, null);
-                if (cursor != null){
-                    while (cursor.moveToNext()) {
+                cursor = db.rawQuery(sql, null);
+                if (cursor != null) {
+//                    while (cursor.moveToNext()) {
+                    cursor.moveToLast();
                         appInfo.setAppName(cursor.getString(cursor.getColumnIndex("appname")));
                         appInfo.setAppPackageName(cursor.getString(cursor.getColumnIndex("apppackagename")));
                         appInfo.setAppDuration(cursor.getString(cursor.getColumnIndex("appduration")));
 
                         LogUtil.e("DBManageAppInfo=====", "appName:" + appInfo.getAppName() + "  appDuration:" + appInfo.getAppDuration() + "  appIcon:" + appInfo.getAppIcon());
 
-                        appInfos.add(appInfo);
-                    }
+                        appInfos1.add(appInfo);
+//                    }
+                    cursor.close();
                 }
             }
             db.setTransactionSuccessful();// 事务成功
         } finally {
             db.endTransaction();// 结束事务
         }
-        return appInfos;
+        return appInfos1;
     }
 
     //---------------------------------t_app-----------------------------
@@ -275,10 +283,10 @@ public class DataBaseManager {
     public ArrayList<AppInfo> findAppListByUId(int userid) {
         db.beginTransaction();// 开始事务
         ArrayList<AppInfo> appInfos = new ArrayList<AppInfo>();
-
+        Cursor cursor = null;
         try {
             String sql = "select * from t_app where userid = '" + userid + "';";
-            Cursor cursor = db.rawQuery(sql, null);
+            cursor = db.rawQuery(sql, null);
             while (cursor.moveToNext()) {
                 AppInfo appInfo = new AppInfo();
                 appInfo.setAppName(cursor.getString(cursor.getColumnIndex("appname")));
@@ -291,9 +299,9 @@ public class DataBaseManager {
 
                 appInfos.add(appInfo);
             }
-
             db.setTransactionSuccessful();// 事务成功
         } finally {
+            cursor.close();
             db.endTransaction();// 结束事务
         }
         return appInfos;
