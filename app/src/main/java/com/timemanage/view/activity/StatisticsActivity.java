@@ -12,8 +12,9 @@ import android.view.Window;
 import android.widget.RadioGroup;
 
 import com.timemanage.R;
-import com.timemanage.view.fragment.DateChartFragment;
+import com.timemanage.view.fragment.DateListFragment;
 import com.timemanage.view.fragment.MonthChartFragment;
+import com.timemanage.view.fragment.MonthListFragment;
 import com.timemanage.view.fragment.WeekChartFragment;
 
 /**
@@ -74,11 +75,8 @@ public class StatisticsActivity extends BaseActivity implements RadioGroup.OnChe
             case R.id.rdbtn_date:
                 setIndexSelected(0);
                 break;
-            case R.id.rdbtn_week:
-                setIndexSelected(1);
-                break;
             case R.id.rdbtn_month:
-                setIndexSelected(2);
+                setIndexSelected(1);
                 break;
             default:
                 break;
@@ -86,13 +84,12 @@ public class StatisticsActivity extends BaseActivity implements RadioGroup.OnChe
     }
 
     private void initFragment() {
-        DateChartFragment dateChartFragment = new DateChartFragment();
-        WeekChartFragment weekChartFragment = new WeekChartFragment();
-        MonthChartFragment monthChartFragment = new MonthChartFragment();
+        DateListFragment dateListFragment = new DateListFragment();
+        MonthListFragment monthListFragment = new MonthListFragment();
 
 
         //添加到数组
-        mFragments = new Fragment[]{dateChartFragment,weekChartFragment,monthChartFragment};
+        mFragments = new Fragment[]{dateListFragment,monthListFragment};
 
         //开启事务
 
@@ -100,7 +97,7 @@ public class StatisticsActivity extends BaseActivity implements RadioGroup.OnChe
                 getSupportFragmentManager().beginTransaction();
 
         //添加首页
-        ft.add(R.id.fl_content,dateChartFragment).commit();
+        ft.add(R.id.fl_content,dateListFragment).commit();
 
         //默认设置为第0个
         setIndexSelected(0);

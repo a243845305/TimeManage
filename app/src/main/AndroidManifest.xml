@@ -18,7 +18,6 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
 
     <!-- Required  一些系统要求的权限，如访问网络等 -->
-    <uses-permission android:name="com.sxau.agriculture.permission.JPUSH_MESSAGE" />
     <uses-permission android:name="android.permission.RECEIVE_USER_PRESENT" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
@@ -42,6 +41,9 @@
         android:theme="@style/AppTheme" >
 
         <service android:name=".service.TimeManageService"/>
+        <receiver android:name=".service.TimeChangeserve$TimeStateBroadcastReceiver"/>
+        <receiver android:name=".service.ScreenObserve$ScreenBroadcastReceiver"/>
+        <receiver  android:name=".service.DateChangeserve$DateStateBroadcastReceiver" android:process=":remote" />
 
         <activity
             android:name=".view.activity.MainActivity"

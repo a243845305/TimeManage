@@ -182,7 +182,8 @@ public class DataBaseManager {
     public void insertAppDurationTot_apptime(List<AppInfo> AppInfos, int year, int month, int day) {
         db.beginTransaction();// 开始事务
         try {
-            for (AppInfo info : AppInfos) {
+            for (int i = 0; i < AppInfos.size(); i++) {
+                AppInfo info = AppInfos.get(i);
                 ContentValues values = new ContentValues();
 
                 values.put("userid", UserInfoUtil.getUserId());
@@ -191,7 +192,11 @@ public class DataBaseManager {
                 values.put("year", year);
                 values.put("month", month);
                 values.put("day", day);
-                values.put("appduration", info.getAppDuration());
+                if (info.getAppDuration() != null) {
+                    values.put("appduration", info.getAppDuration());
+                }else {
+                    values.put("appduration", 0);
+                }
 
                 db.insert("t_apptime", "logid", values);
             }
@@ -217,6 +222,43 @@ public class DataBaseManager {
         }
     }
 
+    public ArrayList<AppInfo> findAppListByMonth(int userid, int year, int month, ArrayList<AppInfo> appInfos) {
+        db.beginTransaction();// 开始事务
+        Cursor cursor = null;
+        ArrayList<AppInfo> appInfos1 = new ArrayList<AppInfo>();
+        try {
+            for (int i = 0; i < appInfos.size(); i++) {
+                AppInfo appInfo = appInfos.get(i);
+                String sql = "select * from t_apptime where userid = " + userid +
+                        " and year = " + year + " and month = " + month +
+                        " and apppackagename = " + "'" + appInfo.getAppPackageName() + "';";
+                cursor = db.rawQuery(sql, null);
+                cursor.moveToFirst();
+                if (cursor.getCount() > 0) {
+                    int count = 0;
+                    while (cursor.moveToNext()) {
+                        if (cursor.getString(cursor.getColumnIndex("appduration")) != null){
+                            count = count + Integer.parseInt(cursor.getString(cursor.getColumnIndex("appduration")));
+                        }
+                        appInfo.setAppName(cursor.getString(cursor.getColumnIndex("appname")));
+                        appInfo.setAppPackageName(cursor.getString(cursor.getColumnIndex("apppackagename")));
+                        appInfo.setAppDuration(count+"");
+
+                        LogUtil.e("DBManageAppInfo=====", "appName:" + appInfo.getAppName() + "  appDuration:" + appInfo.getAppDuration() + "  appIcon:" + appInfo.getAppIcon());
+
+                    }
+                    appInfos1.add(appInfo);
+                    cursor.close();
+                }
+            }
+            db.setTransactionSuccessful();// 事务成功
+        } finally {
+            db.endTransaction();// 结束事务
+        }
+        return appInfos1;
+    }
+
+
     public ArrayList<AppInfo> findAppListByDay(int userid, int year, int month, int day, ArrayList<AppInfo> appInfos) {
         db.beginTransaction();// 开始事务
         Cursor cursor = null;
@@ -228,16 +270,16 @@ public class DataBaseManager {
                         " and year = " + year + " and month = " + month +
                         " and day = " + day + " and apppackagename = " + "'" + appInfo.getAppPackageName() + "';";
                 cursor = db.rawQuery(sql, null);
-                if (cursor != null) {
+                if (cursor.getCount() > 0) {
 //                    while (cursor.moveToNext()) {
                     cursor.moveToLast();
-                        appInfo.setAppName(cursor.getString(cursor.getColumnIndex("appname")));
-                        appInfo.setAppPackageName(cursor.getString(cursor.getColumnIndex("apppackagename")));
-                        appInfo.setAppDuration(cursor.getString(cursor.getColumnIndex("appduration")));
+                    appInfo.setAppName(cursor.getString(cursor.getColumnIndex("appname")));
+                    appInfo.setAppPackageName(cursor.getString(cursor.getColumnIndex("apppackagename")));
+                    appInfo.setAppDuration(cursor.getString(cursor.getColumnIndex("appduration")));
 
-                        LogUtil.e("DBManageAppInfo=====", "appName:" + appInfo.getAppName() + "  appDuration:" + appInfo.getAppDuration() + "  appIcon:" + appInfo.getAppIcon());
+                    LogUtil.e("DBManageAppInfo=====", "appName:" + appInfo.getAppName() + "  appDuration:" + appInfo.getAppDuration() + "  appIcon:" + appInfo.getAppIcon());
 
-                        appInfos1.add(appInfo);
+                    appInfos1.add(appInfo);
 //                    }
                     cursor.close();
                 }

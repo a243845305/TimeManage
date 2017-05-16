@@ -39,13 +39,9 @@
             android:text="日" />
 
         <RadioButton
-            android:id="@+id/rdbtn_week"
-            style="@style/tab_menu_item"
-            android:text="周" />
-
-        <RadioButton
             android:id="@+id/rdbtn_month"
             style="@style/tab_menu_item"
             android:text="月" />
+
     </RadioGroup>
 </LinearLayout>

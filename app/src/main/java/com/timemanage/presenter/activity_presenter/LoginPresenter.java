@@ -1,23 +1,17 @@
 package com.timemanage.presenter.activity_presenter;
 
 import android.content.Intent;
-import android.telecom.Call;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
 import com.timemanage.TimeManageAppliaction;
 import com.timemanage.bean.User;
 import com.timemanage.db.DataBaseManager;
 import com.timemanage.presenter.activity_presenter_interface.ILoginPresenter;
-import com.timemanage.service.TimeManageService;
 import com.timemanage.utils.ACache;
 import com.timemanage.utils.ConstantUtil;
 import com.timemanage.utils.LogUtil;
 import com.timemanage.view.activity.MainActivity;
 import com.timemanage.view.activity_interface.ILoginActivity;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 

@@ -34,6 +34,6 @@ dependencies {
     compile 'com.google.code.gson:gson:2.6.2'
     //  MPAndroidChart依赖
     compile 'com.github.PhilJay:MPAndroidChart:v2.1.6'
-
+    //  sqlite数据库插件依赖
     debugCompile 'com.amitshekhar.android:debug-db:1.0.0'
 }

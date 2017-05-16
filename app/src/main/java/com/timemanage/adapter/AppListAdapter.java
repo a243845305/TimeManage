@@ -9,6 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.timemanage.R;
@@ -24,11 +25,17 @@ public class AppListAdapter extends BaseAdapter {
 
     private Context context;
     private ArrayList<AppInfo> dates;
+    private int num;
 
     public AppListAdapter(Context context, ArrayList<AppInfo> dates) {
         Log.e("appInfos", dates.size() + "");
         this.context = context;
         this.dates = dates;
+        num = 0;
+        for (int i = 0; i < dates.size(); i++) {
+            num = num + Integer.parseInt(dates.get(i).getAppDuration());
+        }
+        num = num + 1;
     }
 
     @Override
@@ -54,7 +61,7 @@ public class AppListAdapter extends BaseAdapter {
             convertView = inflater.inflate(R.layout.item_applist, null);
             holder = new ViewHolder();
             holder.iv_appicon = (ImageView) convertView.findViewById(R.id.iv_appicon);
-            holder.iv_duration = (ImageView) convertView.findViewById(R.id.iv_duration);
+            holder.pb_duration = (ProgressBar) convertView.findViewById(R.id.pb_progressbar);
             holder.tv_time = (TextView) convertView.findViewById(R.id.tv_time);
             holder.tv_appname = (TextView) convertView.findViewById(R.id.tv_appname);
             convertView.setTag(holder);
@@ -65,18 +72,18 @@ public class AppListAdapter extends BaseAdapter {
         AppInfo appInfo = dates.get(position);
 
 
-        holder.iv_duration.setMinimumWidth(80);
+        holder.pb_duration.setProgress((Integer.parseInt(appInfo.getAppDuration()) / num) * 100);
         holder.tv_time.setText(appInfo.getAppDuration());
         holder.iv_appicon.setImageDrawable(appInfo.getAppIcon());
         holder.tv_appname.setText(appInfo.getAppName());
-        LogUtil.e("AppInfo=====","appName:"+appInfo.getAppName()+"  appDuration:"+appInfo.getAppDuration()+"  appIcon:"+appInfo.getAppIcon());
+        LogUtil.e("AppInfo=====", "appName:" + appInfo.getAppName() + "  appDuration:" + appInfo.getAppDuration() + "  appIcon:" + appInfo.getAppIcon());
 
         return convertView;
     }
 
     public class ViewHolder {
         ImageView iv_appicon;
-        ImageView iv_duration;
+        ProgressBar pb_duration;
         TextView tv_time;
         TextView tv_appname;
     }

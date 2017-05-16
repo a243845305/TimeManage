@@ -35,17 +35,18 @@ public class ScreenObserve{
 
     /**
      * screen状态广播接收者
-     * @author zhangyg
      *
      */
-    private class ScreenBroadcastReceiver extends BroadcastReceiver {
+    public class ScreenBroadcastReceiver extends BroadcastReceiver {
         private String action = null;
         @Override
         public void onReceive(Context context, Intent intent) {
             action = intent.getAction();
             if(Intent.ACTION_SCREEN_ON.equals(action)){
+                LogUtil.e("ScreenReceiver","ScreenOn");
                 mScreenStateListener.onScreenOn();
             }else if(Intent.ACTION_SCREEN_OFF.equals(action)){
+                LogUtil.e("ScreenReceiver","ScreenOff");
                 mScreenStateListener.onScreenOff();
             }
         }
