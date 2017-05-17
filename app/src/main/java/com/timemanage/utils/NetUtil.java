@@ -12,7 +12,7 @@ import android.support.v7.app.AlertDialog;
 /**
  * 判断网路状态的Util
  *
- * @author Yawe_Li
+ * @author 高海龙
  */
 public class NetUtil {
 

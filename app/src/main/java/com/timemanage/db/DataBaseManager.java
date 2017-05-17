@@ -192,7 +192,7 @@ public class DataBaseManager {
                 values.put("year", year);
                 values.put("month", month);
                 values.put("day", day);
-                if (info.getAppDuration() != null) {
+                if (info.getAppDuration() != null && info.getAppDuration() != "") {
                     values.put("appduration", info.getAppDuration());
                 }else {
                     values.put("appduration", 0);

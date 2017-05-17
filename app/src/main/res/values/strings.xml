@@ -10,6 +10,7 @@
     <string name="TimeManage">TimeManage</string>
     <string name="welcome">您的时间管家</string>
     <!--personal_information-->
+    <string name="team_information">团队信息</string>
     <string name="personal_information">个人信息</string>
     <string name="head_portrait">头像</string>
     <string name="username">用户名</string>

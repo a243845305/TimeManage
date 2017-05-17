@@ -79,7 +79,7 @@ public class MainActivity extends BaseActivity
         verifyStoragePermissions(this);
 
         //数据库初始化操作
-        dbManager = new DataBaseManager(this);
+        dbManager = new DataBaseManager(TimeManageAppliaction.getContext());
         LogUtil.e("LOOOOOOK", "Here!!!!!!!!!!");
         DebugDB.getAddressLog();
         mCache = ACache.get(TimeManageAppliaction.getContext());
@@ -199,6 +199,8 @@ public class MainActivity extends BaseActivity
             case R.id.nav_share:
                 break;
             case R.id.nav_send:
+                Intent intent1 = new Intent(MainActivity.this, TeamListActivity.class);
+                MainActivity.this.startActivity(intent1);
                 break;
             case R.id.nav_gallery:
                 Intent intent = new Intent(MainActivity.this, PersonalCompileActivity.class);

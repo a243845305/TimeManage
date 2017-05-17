@@ -32,6 +32,11 @@ dependencies {
     compile 'com.android.support:appcompat-v7:24.0.0'
     compile 'com.android.support:design:24.0.0'
     compile 'com.google.code.gson:gson:2.6.2'
+    //  retrofit 网络请求的依赖
+    compile 'com.squareup.okhttp3:okhttp:3.2.0'
+    compile 'com.squareup.retrofit:converter-gson:2.0.0-beta2'
+    //  Picasso 图片缓存库依赖
+    compile 'com.squareup.picasso:picasso:2.5.2'
     //  MPAndroidChart依赖
     compile 'com.github.PhilJay:MPAndroidChart:v2.1.6'
     //  sqlite数据库插件依赖

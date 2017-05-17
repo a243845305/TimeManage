@@ -10,6 +10,8 @@ public class ConstantUtil {
     public static String pkgName = "com.timemanage";
     //服务名
     public static String serviceName = "com.timemanage.service.TimeManageService";
+    //项目网络请求的地址
+    public static final String BASE_URL = "http://172.16.9.126:8088/TimeManageServe/";
 
     //============================整形常量的定义===================================
 

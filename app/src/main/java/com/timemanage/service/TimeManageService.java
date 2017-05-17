@@ -52,7 +52,7 @@ public class TimeManageService extends MyIntentService {
                 new Intent(this, MainActivity.class), 0);
         builder.setContentIntent(contentIntent);
         builder.setSmallIcon(R.mipmap.img_appicon_64px);
-        builder.setTicker("Foreground Service Start");
+        builder.setTicker("TimeManage Service 已经开始为您服务");
         builder.setContentTitle("TimeManage Service");
         builder.setContentText("TimeManage正在为您提供服务");
         Notification notification = builder.build();
@@ -65,8 +65,8 @@ public class TimeManageService extends MyIntentService {
 
 
         //控制手机cpu不休眠
-        PowerManager powerManager =(PowerManager)getSystemService(Context.POWER_SERVICE);
-        PowerManager.WakeLock wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,TAG);//设置休眠状态
+        PowerManager powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
+        PowerManager.WakeLock wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);//设置休眠状态
         //锁定休眠状态
         wakeLock.acquire();
 
@@ -111,10 +111,10 @@ public class TimeManageService extends MyIntentService {
                 for (AppInfo appInfo : appInfos) {
                     if (foregroundProcess.equals(appInfo.getAppPackageName())) {
                         int d = 0;
-                        if (appInfo.getAppDuration() != null){
+                        if (appInfo.getAppDuration() != null && appInfo.getAppDuration() != "") {
                             d = Integer.parseInt(appInfo.getAppDuration());
-                        }else {
-                            appInfo.setAppDuration(0+"");
+                        } else {
+                            appInfo.setAppDuration(0 + "");
                         }
                         d = d + 1;
                         appInfo.setAppDuration(d + "");
@@ -151,9 +151,12 @@ public class TimeManageService extends MyIntentService {
                 int month = c.get(Calendar.MONTH);
                 int day = c.get(Calendar.DAY_OF_MONTH);
 
-                LogUtil.e("该新插入数据了Now ","   month::::" + month + "   day:::" + day + "   year:::" + year);
+                LogUtil.e("该新插入数据了Now ", "   month::::" + month + "   day:::" + day + "   year:::" + year);
 //                每到零点时进行插入数据操作
 //                月份需要加1
+                for (int i = 0; i < appInfos.size(); i++) {
+                    appInfos.get(i).setAppDuration(0 + "");
+                }
                 dbManager.insertAppDurationTot_apptime(appInfos, year, month + 1, day);
             }
 
@@ -164,7 +167,10 @@ public class TimeManageService extends MyIntentService {
                 int month = c.get(Calendar.MONTH);
                 int day = c.get(Calendar.DAY_OF_MONTH);
                 appInfos = ApkUtil.scanLocalInstallAppList(TimeManageService.this.getPackageManager());
-                LogUtil.e("Now ","   month::::" + month + "   day:::" + day + "   year:::" + year);
+                for (int i = 0; i < appInfos.size(); i++) {
+                    appInfos.get(i).setAppDuration(0 + "");
+                }
+                LogUtil.e("Now ", "   month::::" + month + "   day:::" + day + "   year:::" + year);
                 //首次启动需要新增数据
                 //月份需要加1
                 dbManager.insertAppDurationTot_apptime(appInfos, year, month + 1, day);
@@ -178,10 +184,10 @@ public class TimeManageService extends MyIntentService {
                 int day = c.get(Calendar.DAY_OF_MONTH);
                 TimeChangeserve.count = 0;
                 appInfos = ApkUtil.scanLocalInstallAppList(TimeManageService.this.getPackageManager());
-                LogUtil.e("该更新了Now ","   month::::" + month + "   day:::" + day + "   year:::" + year);
+                LogUtil.e("该更新了Now ", "   month::::" + month + "   day:::" + day + "   year:::" + year);
                 //每到整点需要更新数据
                 //月份需要加1
-                dbManager.updateAppDurationTot_apptime(appInfos, year, month+1, day);
+                dbManager.updateAppDurationTot_apptime(appInfos, year, month + 1, day);
             }
         });
 
@@ -202,7 +208,7 @@ public class TimeManageService extends MyIntentService {
             }
         });
 
-        LogUtil.e("TimeService","onStartCommand");
+        LogUtil.e("TimeService", "onStartCommand");
         return super.onStartCommand(intent, flags, startId);
     }
 
