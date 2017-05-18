@@ -25,17 +25,18 @@ public class AppListAdapter extends BaseAdapter {
 
     private Context context;
     private ArrayList<AppInfo> dates;
-    private int num;
+    private double num;
 
     public AppListAdapter(Context context, ArrayList<AppInfo> dates) {
         Log.e("appInfos", dates.size() + "");
         this.context = context;
         this.dates = dates;
-        num = 0;
+        num = 0.0;
         for (int i = 0; i < dates.size(); i++) {
             num = num + Integer.parseInt(dates.get(i).getAppDuration());
+            LogUtil.e("Adapter","num:"+num+"   appduiation:"+dates.get(i).getAppDuration()+"  appName:"+dates.get(i).getAppName());
         }
-        num = num + 1;
+        num = num + 0.1;
     }
 
     @Override
@@ -72,7 +73,7 @@ public class AppListAdapter extends BaseAdapter {
         AppInfo appInfo = dates.get(position);
 
 
-        holder.pb_duration.setProgress((Integer.parseInt(appInfo.getAppDuration()) / num) * 100);
+        holder.pb_duration.setProgress((int)((Integer.parseInt(appInfo.getAppDuration()) / num) * 100));
         holder.tv_time.setText(appInfo.getAppDuration());
         holder.iv_appicon.setImageDrawable(appInfo.getAppIcon());
         holder.tv_appname.setText(appInfo.getAppName());

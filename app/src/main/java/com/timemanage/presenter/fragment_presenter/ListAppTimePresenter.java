@@ -33,7 +33,7 @@ public class ListAppTimePresenter implements IListAppTimePresenter {
         this.iListAppTimeFragment = iListAppTimeFragment;
         this.context = context;
         this.handler = myhandler;
-        dbManager = new DataBaseManager(context);
+        dbManager = new DataBaseManager(TimeManageAppliaction.getContext());
         c = Calendar.getInstance();
     }
     //===================接口方法===========================

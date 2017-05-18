@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Created by Yawen_Li on 2017/5/6.
@@ -29,118 +30,144 @@ import java.util.List;
 public class DataBaseManager {
 
     String TAG = "DataBaseManager";
-    private DataBaseHelper helper;
+    private static DataBaseHelper helper = null;
     private SQLiteDatabase db;
+    private AtomicInteger mOpenCounter;
 //    private static final DataBaseManager dbManager = new DataBaseManager(TimeManageAppliaction.getContext());
 //
 //    public static DataBaseManager getDbManager(){
 //        return dbManager;
 //    }
 
-    public DataBaseManager(Context context) {
 
-        helper = new DataBaseHelper(context);
+    public DataBaseManager(Context context) {
+        mOpenCounter = new AtomicInteger();
+        helper = DataBaseHelper.getInstance(context);
         db = helper.getWritableDatabase();
 
     }
 
 
     //---------------------------------t_user-----------------------------
-    public User findUserByUNameandPwd(String username, String password) {
-        db.beginTransaction();// 开始事务
-        User user = new User();
-        Cursor cursor = null;
-        try {
-            String sql = "select * from t_user where username = '" + username + "' and password = '" + password + "';";
-            cursor = db.rawQuery(sql, null);
-            while (cursor.moveToNext()) {
-                user.setUserId(cursor.getInt(cursor.getColumnIndex("userid")));
-                user.setUserName(cursor.getString(cursor.getColumnIndex("username")));
-                user.setUserId(Integer.parseInt(cursor.getString(cursor.getColumnIndex("userid"))));
-                user.setUserImg(cursor.getString(cursor.getColumnIndex("userimg")));
+    public synchronized User findUserByUNameandPwd(String username, String password) {
+        synchronized (helper) {
+            if (mOpenCounter.incrementAndGet() == 1 || db == null) {
+                db = helper.getWritableDatabase();
             }
-            //        byte[] image = cursor.getBlob(cursor.getColumnIndex("userimg"));
-            //        ByteArrayInputStream bais = new ByteArrayInputStream(image);
-            //        Drawable userImg = Drawable.createFromStream(bais, "imageflag");
-            db.setTransactionSuccessful();// 事务成功
-        } finally {
-            cursor.close();
-            db.endTransaction();// 结束事务
+            db.beginTransaction();// 开始事务
+            User user = new User();
+            Cursor cursor = null;
+            try {
+                String sql = "select * from t_user where username = '" + username + "' and password = '" + password + "';";
+                cursor = db.rawQuery(sql, null);
+                while (cursor.moveToNext()) {
+                    user.setUserId(cursor.getInt(cursor.getColumnIndex("userid")));
+                    user.setUserName(cursor.getString(cursor.getColumnIndex("username")));
+                    user.setUserId(Integer.parseInt(cursor.getString(cursor.getColumnIndex("userid"))));
+                    user.setUserImg(cursor.getString(cursor.getColumnIndex("userimg")));
+                }
+                //        byte[] image = cursor.getBlob(cursor.getColumnIndex("userimg"));
+                //        ByteArrayInputStream bais = new ByteArrayInputStream(image);
+                //        Drawable userImg = Drawable.createFromStream(bais, "imageflag");
+                db.setTransactionSuccessful();// 事务成功
+            } finally {
+                cursor.close();
+                db.endTransaction();// 结束事务
+                closeDB();
+            }
+            return user;
         }
-        return user;
     }
 
-    public boolean updateUserInfo(User user) {
-        boolean isSuccess = false;
-        db.beginTransaction();// 开始事务
-        try {
-            ContentValues cv = new ContentValues();
-
-            cv.put("usernickname", user.getNickName());
-            cv.put("usersex", user.getSex());
-            cv.put("userimg", user.getUserImg());
-            cv.put("signature", user.getSignature());
-
-            String[] args = {String.valueOf(user.getUserName())};
-            int i = db.update("t_user", cv, "username=? ", args);
-
-            if (i > 0) {
-                isSuccess = true;
-            } else {
-                isSuccess = false;
+    public synchronized boolean updateUserInfo(User user) {
+        synchronized (helper) {
+            if (!db.isOpen()) {
+                db = helper.getWritableDatabase();
             }
+            boolean isSuccess = false;
+            db.beginTransaction();// 开始事务
+            try {
+                ContentValues cv = new ContentValues();
 
-            db.setTransactionSuccessful();// 事务成功
-        } finally {
-            db.endTransaction();// 结束事务
+                cv.put("usernickname", user.getNickName());
+                cv.put("usersex", user.getSex());
+                cv.put("userimg", user.getUserImg());
+                cv.put("signature", user.getSignature());
+
+                String[] args = {String.valueOf(user.getUserName())};
+                int i = db.update("t_user", cv, "username=? ", args);
+
+                if (i > 0) {
+                    isSuccess = true;
+                } else {
+                    isSuccess = false;
+                }
+
+                db.setTransactionSuccessful();// 事务成功
+            } finally {
+                db.endTransaction();// 结束事务
+                db.close();
+            }
+            return isSuccess;
         }
-        return isSuccess;
     }
 
-    public boolean isExiteByUserName(String userName) {
-        boolean isExite = false;
-        Cursor cur = null;
-        db.beginTransaction();// 开始事务
-        try {
-            String sql = "SELECT * FROM t_user WHERE username = '" + userName + "';";
-            cur = db.rawQuery(sql, null);
-            if (cur.getCount() > 0) {
+    public synchronized boolean isExiteByUserName(String userName) {
+        synchronized (helper) {
+            if (!db.isOpen()) {
+                db = helper.getWritableDatabase();
+            }
+            boolean isExite = false;
+            Cursor cur = null;
+            db.beginTransaction();// 开始事务
+            try {
+                String sql = "SELECT * FROM t_user WHERE username = '" + userName + "';";
+                cur = db.rawQuery(sql, null);
+                if (cur.getCount() > 0) {
+                    isExite = true;
+                } else {
+                    isExite = false;
+                }
+
+                db.setTransactionSuccessful();// 事务成功
+            } finally {
+                cur.close();
+                db.endTransaction();// 结束事务
+                db.close();
+            }
+            return isExite;
+        }
+    }
+
+    public synchronized boolean insertUserInfo(User user) {
+        synchronized (helper) {
+            if (mOpenCounter.incrementAndGet() == 1 || db == null) {
+                db = helper.getWritableDatabase();
+            }
+            boolean isExite = false;
+            long i = 0;
+            db.beginTransaction();// 开始事务
+            try {
+                ContentValues values = new ContentValues();
+
+                values.put("username", user.getUserName());
+                values.put("password", user.getPassWord());
+                values.put("userimg", user.getUserImg());
+
+                i = db.insert("t_user", "userid", values);
+
+                db.setTransactionSuccessful();// 事务成功
+            } finally {
+                db.endTransaction();// 结束事务
+                closeDB();
+            }
+            if (i != 0) {
                 isExite = true;
             } else {
                 isExite = false;
             }
-
-            db.setTransactionSuccessful();// 事务成功
-        } finally {
-            cur.close();
-            db.endTransaction();// 结束事务
+            return isExite;
         }
-        return isExite;
-    }
-
-    public boolean insertUserInfo(User user) {
-        boolean isExite = false;
-        long i = 0;
-        db.beginTransaction();// 开始事务
-        try {
-            ContentValues values = new ContentValues();
-
-            values.put("username", user.getUserName());
-            values.put("password", user.getPassWord());
-            values.put("userimg", user.getUserImg());
-
-            i = db.insert("t_user", "userid", values);
-
-            db.setTransactionSuccessful();// 事务成功
-        } finally {
-            db.endTransaction();// 结束事务
-        }
-        if (i != 0) {
-            isExite = true;
-        } else {
-            isExite = false;
-        }
-        return isExite;
     }
 
     //图片转换成可存储的类型
@@ -156,200 +183,244 @@ public class DataBaseManager {
     }
 
     //---------------------------------t_apptime-----------------------------
-    public boolean isExiteByappName(String appPackageName) {
-        boolean isExite = false;
-        Cursor cur = null;
-        db.beginTransaction();// 开始事务
-        try {
-            //因为汉字的问题，导致了数据库内查询失败，目前想到一种解决办法，在拿app名字的时候同时拿到app的包名
-            //修改库，修改实体类，使用包名来进行查询操作
-            String sql = "SELECT appname FROM t_app WHERE apppackagename = '" + appPackageName + "';";
-            cur = db.rawQuery(sql, null);
-            if (cur.getCount() > 0) {
-                isExite = true;
-            } else {
-                isExite = false;
+    public synchronized boolean isExiteByappName(String appPackageName) {
+        synchronized (helper) {
+            if (mOpenCounter.incrementAndGet() == 1 || db == null) {
+                db = helper.getWritableDatabase();
             }
-
-            db.setTransactionSuccessful();// 事务成功
-        } finally {
-            cur.close();
-            db.endTransaction();// 结束事务
-        }
-        return isExite;
-    }
-
-    public void insertAppDurationTot_apptime(List<AppInfo> AppInfos, int year, int month, int day) {
-        db.beginTransaction();// 开始事务
-        try {
-            for (int i = 0; i < AppInfos.size(); i++) {
-                AppInfo info = AppInfos.get(i);
-                ContentValues values = new ContentValues();
-
-                values.put("userid", UserInfoUtil.getUserId());
-                values.put("appname", info.getAppName());
-                values.put("apppackagename", info.getAppPackageName());
-                values.put("year", year);
-                values.put("month", month);
-                values.put("day", day);
-                if (info.getAppDuration() != null && info.getAppDuration() != "") {
-                    values.put("appduration", info.getAppDuration());
-                }else {
-                    values.put("appduration", 0);
+            boolean isExite = false;
+            Cursor cur = null;
+            db.beginTransaction();// 开始事务
+            try {
+                //因为汉字的问题，导致了数据库内查询失败，目前想到一种解决办法，在拿app名字的时候同时拿到app的包名
+                //修改库，修改实体类，使用包名来进行查询操作
+                String sql = "SELECT appname FROM t_app WHERE apppackagename = '" + appPackageName + "';";
+                cur = db.rawQuery(sql, null);
+                if (cur.getCount() > 0) {
+                    isExite = true;
+                } else {
+                    isExite = false;
                 }
 
-                db.insert("t_apptime", "logid", values);
+                db.setTransactionSuccessful();// 事务成功
+            } finally {
+                cur.close();
+                db.endTransaction();// 结束事务
+                closeDB();
             }
-            db.setTransactionSuccessful();// 事务成功
-        } finally {
-            db.endTransaction();// 结束事务
+            return isExite;
         }
     }
 
-    public void updateAppDurationTot_apptime(List<AppInfo> AppInfos, int year, int month, int day) {
-        db.beginTransaction();// 开始事务
-        try {
-            for (AppInfo info : AppInfos) {
-                ContentValues cv = new ContentValues();
-
-                cv.put("appduration", info.getAppDuration());
-                String[] args = {String.valueOf(info.getAppPackageName()), String.valueOf(year), String.valueOf(month), String.valueOf(day)};
-                db.update("t_apptime", cv, "apppackagename=? and year=? and month=? and day=?", args);
+    public synchronized void insertAppDurationTot_apptime(List<AppInfo> AppInfos, int year, int month, int day) {
+        synchronized (helper) {
+            if (mOpenCounter.incrementAndGet() == 1 || db == null) {
+                db = helper.getWritableDatabase();
             }
-            db.setTransactionSuccessful();// 事务成功
-        } finally {
-            db.endTransaction();// 结束事务
-        }
-    }
-
-    public ArrayList<AppInfo> findAppListByMonth(int userid, int year, int month, ArrayList<AppInfo> appInfos) {
-        db.beginTransaction();// 开始事务
-        Cursor cursor = null;
-        ArrayList<AppInfo> appInfos1 = new ArrayList<AppInfo>();
-        try {
-            for (int i = 0; i < appInfos.size(); i++) {
-                AppInfo appInfo = appInfos.get(i);
-                String sql = "select * from t_apptime where userid = " + userid +
-                        " and year = " + year + " and month = " + month +
-                        " and apppackagename = " + "'" + appInfo.getAppPackageName() + "';";
-                cursor = db.rawQuery(sql, null);
-                cursor.moveToFirst();
-                if (cursor.getCount() > 0) {
-                    int count = 0;
-                    while (cursor.moveToNext()) {
-                        if (cursor.getString(cursor.getColumnIndex("appduration")) != null){
-                            count = count + Integer.parseInt(cursor.getString(cursor.getColumnIndex("appduration")));
-                        }
-                        appInfo.setAppName(cursor.getString(cursor.getColumnIndex("appname")));
-                        appInfo.setAppPackageName(cursor.getString(cursor.getColumnIndex("apppackagename")));
-                        appInfo.setAppDuration(count+"");
-
-                        LogUtil.e("DBManageAppInfo=====", "appName:" + appInfo.getAppName() + "  appDuration:" + appInfo.getAppDuration() + "  appIcon:" + appInfo.getAppIcon());
-
-                    }
-                    appInfos1.add(appInfo);
-                    cursor.close();
-                }
-            }
-            db.setTransactionSuccessful();// 事务成功
-        } finally {
-            db.endTransaction();// 结束事务
-        }
-        return appInfos1;
-    }
-
-
-    public ArrayList<AppInfo> findAppListByDay(int userid, int year, int month, int day, ArrayList<AppInfo> appInfos) {
-        db.beginTransaction();// 开始事务
-        Cursor cursor = null;
-        ArrayList<AppInfo> appInfos1 = new ArrayList<AppInfo>();
-        try {
-            for (int i = 0; i < appInfos.size(); i++) {
-                AppInfo appInfo = appInfos.get(i);
-                String sql = "select * from t_apptime where userid = " + userid +
-                        " and year = " + year + " and month = " + month +
-                        " and day = " + day + " and apppackagename = " + "'" + appInfo.getAppPackageName() + "';";
-                cursor = db.rawQuery(sql, null);
-                if (cursor.getCount() > 0) {
-//                    while (cursor.moveToNext()) {
-                    cursor.moveToLast();
-                    appInfo.setAppName(cursor.getString(cursor.getColumnIndex("appname")));
-                    appInfo.setAppPackageName(cursor.getString(cursor.getColumnIndex("apppackagename")));
-                    appInfo.setAppDuration(cursor.getString(cursor.getColumnIndex("appduration")));
-
-                    LogUtil.e("DBManageAppInfo=====", "appName:" + appInfo.getAppName() + "  appDuration:" + appInfo.getAppDuration() + "  appIcon:" + appInfo.getAppIcon());
-
-                    appInfos1.add(appInfo);
-//                    }
-                    cursor.close();
-                }
-            }
-            db.setTransactionSuccessful();// 事务成功
-        } finally {
-            db.endTransaction();// 结束事务
-        }
-        return appInfos1;
-    }
-
-    //---------------------------------t_app-----------------------------
-    public void insertAppContentsTot_app(List<AppInfo> AppInfos) {
-        db.beginTransaction();// 开始事务
-        try {
-            for (AppInfo info : AppInfos) {
-                //如果库中不存在该appPackageName 向t_app中插入数据
-                if (!isExiteByappName(info.getAppPackageName())) {
-
+            db.beginTransaction();// 开始事务
+            try {
+                for (int i = 0; i < AppInfos.size(); i++) {
+                    AppInfo info = AppInfos.get(i);
                     ContentValues values = new ContentValues();
-
-                    //将图片转为字节流
-                    Bitmap bmp = (((BitmapDrawable) info.getAppIcon()).getBitmap());
-                    final ByteArrayOutputStream os = new ByteArrayOutputStream();
-                    bmp.compress(Bitmap.CompressFormat.PNG, 100, os);
 
                     values.put("userid", UserInfoUtil.getUserId());
                     values.put("appname", info.getAppName());
-                    values.put("appicon", os.toByteArray());
                     values.put("apppackagename", info.getAppPackageName());
+                    values.put("year", year);
+                    values.put("month", month);
+                    values.put("day", day);
+                    if (info.getAppDuration() != null && info.getAppDuration() != "") {
+                        values.put("appduration", info.getAppDuration());
+                    } else {
+                        values.put("appduration", 0);
+                    }
 
-                    long i = db.insert("t_app", "appid", values);
-                    LogUtil.e("add操作：", i + "name:" + values.getAsString("appname") + "    Packagename:" + values.getAsString("apppackagename"));
+                    db.insert("t_apptime", "logid", values);
                 }
-
+                db.setTransactionSuccessful();// 事务成功
+            } finally {
+                db.endTransaction();// 结束事务
+                closeDB();
             }
-            db.setTransactionSuccessful();// 事务成功
-        } finally {
-            db.endTransaction();// 结束事务
         }
     }
 
-    public ArrayList<AppInfo> findAppListByUId(int userid) {
-        db.beginTransaction();// 开始事务
-        ArrayList<AppInfo> appInfos = new ArrayList<AppInfo>();
-        Cursor cursor = null;
-        try {
-            String sql = "select * from t_app where userid = '" + userid + "';";
-            cursor = db.rawQuery(sql, null);
-            while (cursor.moveToNext()) {
-                AppInfo appInfo = new AppInfo();
-                appInfo.setAppName(cursor.getString(cursor.getColumnIndex("appname")));
-                appInfo.setAppPackageName(cursor.getString(cursor.getColumnIndex("apppackagename")));
-
-                byte[] image = cursor.getBlob(cursor.getColumnIndex("appicon"));
-                ByteArrayInputStream bais = new ByteArrayInputStream(image);
-                Drawable appicon = Drawable.createFromStream(bais, "imageflag");
-                appInfo.setAppIcon(appicon);
-
-                appInfos.add(appInfo);
+    public synchronized void updateAppDurationTot_apptime(List<AppInfo> AppInfos, int year, int month, int day) {
+        synchronized (helper) {
+            if (mOpenCounter.incrementAndGet() == 1 || db == null) {
+                db = helper.getWritableDatabase();
             }
-            db.setTransactionSuccessful();// 事务成功
-        } finally {
-            cursor.close();
-            db.endTransaction();// 结束事务
+            db.beginTransaction();// 开始事务
+            try {
+                for (AppInfo info : AppInfos) {
+                    ContentValues cv = new ContentValues();
+
+                    cv.put("appduration", info.getAppDuration());
+                    String[] args = {String.valueOf(info.getAppPackageName()), String.valueOf(year), String.valueOf(month), String.valueOf(day)};
+                    db.update("t_apptime", cv, "apppackagename=? and year=? and month=? and day=?", args);
+                }
+                db.setTransactionSuccessful();// 事务成功
+            } finally {
+                db.endTransaction();// 结束事务
+                closeDB();
+            }
         }
-        return appInfos;
+    }
+
+    public synchronized ArrayList<AppInfo> findAppListByMonth(int userid, int year, int month, ArrayList<AppInfo> appInfos) {
+        synchronized (helper) {
+            if (mOpenCounter.incrementAndGet() == 1 || db == null) {
+                db = helper.getWritableDatabase();
+            }
+            db.beginTransaction();// 开始事务
+
+            ArrayList<AppInfo> appInfos1 = new ArrayList<AppInfo>();
+            try {
+                for (int i = 0; i < appInfos.size(); i++) {
+                    AppInfo appInfo = appInfos.get(i);
+                    String sql = "select * from t_apptime where userid = " + userid +
+                            " and year = " + year + " and month = " + month +
+                            " and apppackagename = " + "'" + appInfo.getAppPackageName() + "';";
+                    Cursor cursor = db.rawQuery(sql, null);
+                    LogUtil.e("MonthDBManage","count:"+cursor.getCount());
+                    cursor.moveToFirst();
+                    if (cursor.getCount() > 0) {
+                        int count = 0;
+                        do {
+                            if (cursor.getString(cursor.getColumnIndex("appduration")) != null) {
+                                count = count + Integer.parseInt(cursor.getString(cursor.getColumnIndex("appduration")));
+                            }
+//                        appInfo.setAppName(cursor.getString(cursor.getColumnIndex("appname")));
+//                        appInfo.setAppPackageName(cursor.getString(cursor.getColumnIndex("apppackagename")));
+                            appInfo.setAppDuration(count + "");
+
+                            LogUtil.e("MonthDBManageAppInfo=====", "appName:" + appInfo.getAppName() + "  appDuration:" + appInfo.getAppDuration() + "  appIcon:" + appInfo.getAppIcon());
+
+                        } while (cursor.moveToNext());
+                        appInfos1.add(appInfo);
+                        cursor.close();
+                    }
+                }
+                db.setTransactionSuccessful();// 事务成功
+            } finally {
+                db.endTransaction();// 结束事务
+                closeDB();
+            }
+            return appInfos1;
+        }
+    }
+
+    public synchronized ArrayList<AppInfo> findAppListByDay(int userid, int year, int month, int day, ArrayList<AppInfo> appInfos) {
+        synchronized (helper) {
+            if (mOpenCounter.incrementAndGet() == 1 || db == null) {
+                db = helper.getWritableDatabase();
+            }
+            db.beginTransaction();// 开始事务
+            Cursor cursor = null;
+            ArrayList<AppInfo> appInfos1 = new ArrayList<AppInfo>();
+            try {
+                for (int i = 0; i < appInfos.size(); i++) {
+                    AppInfo appInfo = appInfos.get(i);
+                    String sql = "select * from t_apptime where userid = " + userid +
+                            " and year = " + year + " and month = " + month +
+                            " and day = " + day + " and apppackagename = " + "'" + appInfo.getAppPackageName() + "';";
+                    cursor = db.rawQuery(sql, null);
+                    if (cursor.getCount() > 0) {
+//                    while (cursor.moveToNext()) {
+                        cursor.moveToLast();
+                        appInfo.setAppName(cursor.getString(cursor.getColumnIndex("appname")));
+                        appInfo.setAppPackageName(cursor.getString(cursor.getColumnIndex("apppackagename")));
+                        appInfo.setAppDuration(cursor.getString(cursor.getColumnIndex("appduration")));
+
+                        LogUtil.e("DBManageAppInfo=====", "appName:" + appInfo.getAppName() + "  appDuration:" + appInfo.getAppDuration() + "  appIcon:" + appInfo.getAppIcon());
+
+                        appInfos1.add(appInfo);
+//                    }
+                        cursor.close();
+                    }
+                }
+                db.setTransactionSuccessful();// 事务成功
+            } finally {
+                db.endTransaction();// 结束事务
+                closeDB();
+            }
+            return appInfos1;
+        }
+    }
+
+    //---------------------------------t_app-----------------------------
+    public synchronized void insertAppContentsTot_app(List<AppInfo> AppInfos) {
+        synchronized (helper) {
+            if (mOpenCounter.incrementAndGet() == 1 || db == null) {
+                db = helper.getWritableDatabase();
+            }
+            db.beginTransaction();// 开始事务
+            try {
+                for (AppInfo info : AppInfos) {
+                    //如果库中不存在该appPackageName 向t_app中插入数据
+                    if (!isExiteByappName(info.getAppPackageName())) {
+
+                        ContentValues values = new ContentValues();
+
+                        //将图片转为字节流
+                        Bitmap bmp = (((BitmapDrawable) info.getAppIcon()).getBitmap());
+                        final ByteArrayOutputStream os = new ByteArrayOutputStream();
+                        bmp.compress(Bitmap.CompressFormat.PNG, 100, os);
+
+                        values.put("userid", UserInfoUtil.getUserId());
+                        values.put("appname", info.getAppName());
+                        values.put("appicon", os.toByteArray());
+                        values.put("apppackagename", info.getAppPackageName());
+
+                        long i = db.insert("t_app", "appid", values);
+                        LogUtil.e("add操作：", i + "name:" + values.getAsString("appname") + "    Packagename:" + values.getAsString("apppackagename"));
+                    }
+
+                }
+                db.setTransactionSuccessful();// 事务成功
+            } finally {
+                db.endTransaction();// 结束事务
+                closeDB();
+            }
+        }
+    }
+
+    public synchronized ArrayList<AppInfo> findAppListByUId(int userid) {
+        synchronized (helper) {
+            if (mOpenCounter.incrementAndGet() == 1 || db == null) {
+                db = helper.getWritableDatabase();
+            }
+            db.beginTransaction();// 开始事务
+            ArrayList<AppInfo> appInfos = new ArrayList<AppInfo>();
+            Cursor cursor = null;
+            try {
+                String sql = "select * from t_app where userid = '" + userid + "';";
+                cursor = db.rawQuery(sql, null);
+                while (cursor.moveToNext()) {
+                    AppInfo appInfo = new AppInfo();
+                    appInfo.setAppName(cursor.getString(cursor.getColumnIndex("appname")));
+                    appInfo.setAppPackageName(cursor.getString(cursor.getColumnIndex("apppackagename")));
+
+                    byte[] image = cursor.getBlob(cursor.getColumnIndex("appicon"));
+                    ByteArrayInputStream bais = new ByteArrayInputStream(image);
+                    Drawable appicon = Drawable.createFromStream(bais, "imageflag");
+                    appInfo.setAppIcon(appicon);
+
+                    appInfos.add(appInfo);
+                }
+                db.setTransactionSuccessful();// 事务成功
+            } finally {
+                cursor.close();
+                db.endTransaction();// 结束事务
+                closeDB();
+            }
+            return appInfos;
+        }
     }
 
     public void closeDB() {
-        db.close();
+        if (mOpenCounter.decrementAndGet() == 0) {
+            db.close();
+        }
     }
 }

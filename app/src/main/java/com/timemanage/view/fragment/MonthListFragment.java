@@ -84,7 +84,7 @@ public class MonthListFragment extends BaseFragment implements IMonthListFragmen
 
 
     private void initView() {
-        appInfos = iMonthListPresenter.getDatas();
+        iMonthListPresenter.quertInitDatas();
         LogUtil.d("ListAppTimeFragment", "1、初始化View，获取数据");
         if (appInfos.isEmpty()) {
             lv_applist.setVisibility(View.GONE);
@@ -130,8 +130,8 @@ public class MonthListFragment extends BaseFragment implements IMonthListFragmen
             year=myyear;
             month=monthOfYear;
             day = dayOfMonth;
-            appInfos = iMonthListPresenter.getDatasByMonth(year, month);
-            updateView(appInfos);
+            iMonthListPresenter.queryDatasByMonth(year, month);
+//            updateView(appInfos);
             //更新日期
             updateDate();
 
@@ -157,6 +157,12 @@ public class MonthListFragment extends BaseFragment implements IMonthListFragmen
             switch (msg.what) {
                 case ConstantUtil.GET_NET_DATA:
                     LogUtil.d("MonthListFragment", "5、收到通知，数据已经更新，拿数据，更新页面，执行updateView方法");
+                    appInfos = iMonthListPresenter.getDatasByMonth();
+                    updateView(appInfos);
+                    break;
+                case ConstantUtil.INIT_DATA:
+                    LogUtil.d("MonthListFragment", "5、收到通知，数据已经更新，拿数据，更新页面，执行updateView方法");
+                    appInfos = iMonthListPresenter.getDatas();
                     updateView(appInfos);
                     break;
                 default:
@@ -168,6 +174,7 @@ public class MonthListFragment extends BaseFragment implements IMonthListFragmen
     //================================接口方法============================
     @Override
     public void updateView(ArrayList<AppInfo> appInfos) {
+
         if (appInfos.isEmpty()) {
             lv_applist.setVisibility(View.GONE);
             emptyView.setVisibility(View.VISIBLE);
@@ -179,7 +186,7 @@ public class MonthListFragment extends BaseFragment implements IMonthListFragmen
             AppInfo appInfo = appInfos.get(1);
             LogUtil.e("List_AppInfo=====", "appName:" + appInfo.getAppName() + "  appDuration:" + appInfo.getAppDuration() + "  appIcon:" + appInfo.getAppIcon());
 
-            appInfos = iMonthListPresenter.getDatas();
+//            appInfos = iMonthListPresenter.getDatas();
 
             appListAdapter = new AppListAdapter(context, appInfos);
             lv_applist.setAdapter(appListAdapter);

@@ -50,7 +50,7 @@ public class TimeChangeserve {
                 if (hour == 0 && minute < 10 && count < 1) {
                     count = 1;
                     mTimeStateListener.onTimeToInsert();
-                }else if (minute == 0){
+                }else if (minute == 56){
                     mTimeStateListener.onTimeToUpdate();
                 }
             }

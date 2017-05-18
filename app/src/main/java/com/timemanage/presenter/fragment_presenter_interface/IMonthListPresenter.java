@@ -9,5 +9,7 @@ import java.util.ArrayList;
  */
 public interface IMonthListPresenter {
     ArrayList<AppInfo> getDatas();
-    ArrayList<AppInfo> getDatasByMonth(int year, int month);
+    ArrayList<AppInfo> getDatasByMonth();
+    void queryDatasByMonth(int year, int month);
+    void quertInitDatas();
 }

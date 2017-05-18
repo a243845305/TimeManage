@@ -22,10 +22,10 @@ import java.util.List;
 public class ApkUtil {
 
     static  String TAG = "ApkTool";
-    public static List<AppInfo> mLocalInstallApps = null;
+    public static ArrayList<AppInfo> mLocalInstallApps = null;
 
-    public static List<AppInfo> scanLocalInstallAppList(PackageManager packageManager) {
-        List<AppInfo> myAppInfos = new ArrayList<AppInfo>();
+    public static ArrayList<AppInfo> scanLocalInstallAppList(PackageManager packageManager) {
+        ArrayList<AppInfo> myAppInfos = new ArrayList<AppInfo>();
         try {
             List<PackageInfo> packageInfos = packageManager.getInstalledPackages(0);
             for (int i = 0; i < packageInfos.size(); i++) {

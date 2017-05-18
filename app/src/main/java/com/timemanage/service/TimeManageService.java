@@ -19,8 +19,10 @@ import com.timemanage.db.DataBaseManager;
 import com.timemanage.utils.ApkUtil;
 import com.timemanage.utils.ConstantUtil;
 import com.timemanage.utils.LogUtil;
+import com.timemanage.utils.UserInfoUtil;
 import com.timemanage.view.activity.MainActivity;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -36,7 +38,7 @@ public class TimeManageService extends MyIntentService {
     private TimeChangeserve timeChangeserve;
     private boolean isScreenOn;
     private DataBaseManager dbManager;
-    private List<AppInfo> appInfos;
+    private ArrayList<AppInfo> appInfos;
     private Calendar c;
 
     public TimeManageService() {
@@ -59,7 +61,7 @@ public class TimeManageService extends MyIntentService {
         startForeground(1, notification);
 
         isScreenOn = true;
-        dbManager = new DataBaseManager(this);
+        dbManager = new DataBaseManager(TimeManageAppliaction.getContext());
         timeChangeserve = new TimeChangeserve(TimeManageService.this);
         screenObserve = new ScreenObserve(TimeManageService.this);
 
@@ -77,6 +79,12 @@ public class TimeManageService extends MyIntentService {
             @Override
             public void run() {
                 super.run();
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException("interrupted", e);
+                }
+
                 appInfos = ApkUtil.scanLocalInstallAppList(TimeManageService.this.getPackageManager());
                 int count = 0;
                 for (AppInfo appInfo : appInfos) {
@@ -88,6 +96,17 @@ public class TimeManageService extends MyIntentService {
                 }
                 //扫描所有app并写入app列表中
                 dbManager.insertAppContentsTot_app(appInfos);
+
+                c = Calendar.getInstance();
+                int year = c.get(Calendar.YEAR);
+                int month = c.get(Calendar.MONTH);
+                int day = c.get(Calendar.DAY_OF_MONTH);
+                int minute = c.get(Calendar.MINUTE);
+                int hour = c.get(Calendar.HOUR_OF_DAY);
+                LogUtil.e("Now minute:::::", minute + "" + "hour:::" + hour + "   month::::" + month + "   day:::" + day + "   year:::" + year);
+
+                appInfos = dbManager.findAppListByDay(Integer.parseInt(UserInfoUtil.getUserId()),year,month +1,day,appInfos);
+
             }
         }.start();
     }
@@ -103,12 +122,18 @@ public class TimeManageService extends MyIntentService {
         while (isScreenOn) {
             String foregroundProcess = ApkUtil.getForegroundApp(TimeManageService.this.getPackageManager());
             if (foregroundProcess != null) {
-                try {
-                    Thread.sleep(2000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                for (AppInfo appInfo : appInfos) {
+                c = Calendar.getInstance();
+                int year = c.get(Calendar.YEAR);
+                int month = c.get(Calendar.MONTH);
+                int day = c.get(Calendar.DAY_OF_MONTH);
+                int minute = c.get(Calendar.MINUTE);
+                int hour = c.get(Calendar.HOUR_OF_DAY);
+                LogUtil.e("Now minute:::::", minute + "" + "hour:::" + hour + "   month::::" + month + "   day:::" + day + "   year:::" + year);
+
+                appInfos = dbManager.findAppListByDay(Integer.parseInt(UserInfoUtil.getUserId()),year,month +1,day,appInfos);
+
+                for (int i=0;i<appInfos.size();i++) {
+                    AppInfo appInfo = appInfos.get(i);
                     if (foregroundProcess.equals(appInfo.getAppPackageName())) {
                         int d = 0;
                         if (appInfo.getAppDuration() != null && appInfo.getAppDuration() != "") {
@@ -118,18 +143,13 @@ public class TimeManageService extends MyIntentService {
                         }
                         d = d + 1;
                         appInfo.setAppDuration(d + "");
+                        //改变数组内的这一元素的值
+                        appInfos.set(i,appInfo);
                         LogUtil.e("appDuration", appInfo.getAppDuration());
                     }
                 }
                 LogUtil.e("foregroundProcess:", foregroundProcess);
             }
-            c = Calendar.getInstance();
-            int year = c.get(Calendar.YEAR);
-            int month = c.get(Calendar.MONTH);
-            int day = c.get(Calendar.DAY_OF_MONTH);
-            int minute = c.get(Calendar.MINUTE);
-            int hour = c.get(Calendar.HOUR_OF_DAY);
-            LogUtil.e("Now minute:::::", minute + "" + "hour:::" + hour + "   month::::" + month + "   day:::" + day + "   year:::" + year);
 
 
             try {
@@ -183,7 +203,6 @@ public class TimeManageService extends MyIntentService {
                 int month = c.get(Calendar.MONTH);
                 int day = c.get(Calendar.DAY_OF_MONTH);
                 TimeChangeserve.count = 0;
-                appInfos = ApkUtil.scanLocalInstallAppList(TimeManageService.this.getPackageManager());
                 LogUtil.e("该更新了Now ", "   month::::" + month + "   day:::" + day + "   year:::" + year);
                 //每到整点需要更新数据
                 //月份需要加1

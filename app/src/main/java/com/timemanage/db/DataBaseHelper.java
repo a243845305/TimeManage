@@ -24,6 +24,18 @@ public class DataBaseHelper extends SQLiteOpenHelper {
         LogUtil.d("DB_PATH:", context.getDatabasePath(DB_NAME).toString());
     }
 
+    private volatile static DataBaseHelper uniqueInstance;
+    public static DataBaseHelper getInstance(Context context) {
+        if (uniqueInstance == null) {
+            synchronized (DataBaseHelper.class) {
+                if (uniqueInstance == null) {
+                    uniqueInstance = new DataBaseHelper(context);
+                }
+            }
+        }
+        return uniqueInstance;
+    }
+
     public boolean deleteDBByName() {
         context.deleteDatabase(DB_NAME);
         LogUtil.d("DB", "had deleted database:" + DB_NAME);

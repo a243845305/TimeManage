@@ -15,7 +15,9 @@ public class ConstantUtil {
 
     //============================整形常量的定义===================================
 
-    //获取网络的数据
+    //初始化界面时的数据
+    public static final int INIT_DATA = 0x00000001;
+    //获取新的数据
     public static final int GET_NET_DATA = 0x00000002;
     //启动activity
     public static final int START_ACTIVITY = 0x00000009;
